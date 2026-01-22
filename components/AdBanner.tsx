@@ -10,13 +10,14 @@ interface AdBannerProps {
 }
 
 export default function AdBanner({ 
-  slot = '1234567890', 
+  slot, 
   style = { display: 'block', minWidth: '320px', minHeight: '100px' },
   format = 'auto',
   responsive = true
 }: AdBannerProps) {
   const [showPlaceholder, setShowPlaceholder] = useState(true)
-  const adClientId = 'ca-pub-XXXXXXXXXXXXXXXX'
+  const adClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX'
+  const adSlot = slot || process.env.NEXT_PUBLIC_ADSENSE_SLOT || '1234567890'
 
   useEffect(() => {
     // Zkontrolovat, zda je AdSense ID nastaveno (ne placeholder)
@@ -74,7 +75,7 @@ export default function AdBanner({
         className="adsbygoogle"
         style={style}
         data-ad-client={adClientId}
-        data-ad-slot={slot}
+        data-ad-slot={adSlot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? 'true' : 'false'}
       />

@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { BlogPost } from '@/lib/posts'
 import RichTextEditor from '@/components/RichTextEditor'
 
 export default function AdminPage() {
+  const router = useRouter()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
@@ -16,9 +18,32 @@ export default function AdminPage() {
   })
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' })
+      router.push('/admin-secret-2024/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
+
   useEffect(() => {
-    loadPosts()
-  }, [])
+    // Ověřit, že je uživatel přihlášen
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/verify')
+        if (!response.ok) {
+          router.push('/admin-secret-2024/login')
+          return
+        }
+        loadPosts()
+      } catch (error) {
+        router.push('/admin-secret-2024/login')
+      }
+    }
+    checkAuth()
+  }, [router])
 
   const loadPosts = async () => {
     try {
@@ -121,9 +146,18 @@ export default function AdminPage() {
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            CMS - Správa článků
-          </h1>
+          <div className="flex justify-between items-center mb-4">
+            <div></div>
+            <h1 className="text-5xl font-bold text-gray-900">
+              CMS - Správa článků
+            </h1>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Odhlásit se
+            </button>
+          </div>
           <p className="text-xl text-gray-600">
             Přidávejte a spravujte články na blog
           </p>
