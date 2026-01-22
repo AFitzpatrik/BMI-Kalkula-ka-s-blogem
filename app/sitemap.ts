@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next'
 import { getAllPosts } from '@/lib/posts'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getAllPosts()
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = await getAllPosts()
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://bmi-kalkula-ka-s-blogem-git-main-patriks-projects-e4ad545d.vercel.app'
 
   const postUrls = posts.map((post) => ({
