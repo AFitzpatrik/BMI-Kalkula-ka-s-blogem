@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { Pool } from 'pg'
 
 export interface BlogPost {
   id: string
@@ -15,24 +16,50 @@ export interface BlogPost {
 const postsDirectory = path.join(process.cwd(), 'data')
 const postsFile = path.join(postsDirectory, 'posts.json')
 
-// KV instance
-let kvClient: any = null
+// PostgreSQL pool - pro produkci
+let pgPool: Pool | null = null
 
-async function getKVClient() {
-  if (kvClient) return kvClient
+function getPGPool(): Pool | null {
+  if (pgPool) return pgPool
   
-  // Jen na produkci a pokud jsou dostupné KV proměnné
-  if (process.env.NODE_ENV === 'production' && process.env.KV_REST_API_URL) {
+  // Jen pokud je dostupná DATABASE_URL (Neon PostgreSQL)
+  if (process.env.DATABASE_URL && process.env.NODE_ENV === 'production') {
     try {
-      const { kv } = await import('@vercel/kv')
-      kvClient = kv
-      console.log('✅ Using Vercel KV for storage')
-      return kvClient
+      pgPool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },
+      })
+      console.log('✅ Using Neon PostgreSQL for storage')
+      return pgPool
     } catch (error) {
-      console.error('KV not available, falling back to filesystem:', error)
+      console.error('PostgreSQL connection failed:', error)
     }
   }
   return null
+}
+
+// Inicializovat databázovou tabulku
+async function initDB() {
+  const pool = getPGPool()
+  if (!pool) return
+  
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS blog_posts (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        excerpt TEXT NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP NOT NULL
+      )
+    `)
+    console.log('✅ Database initialized')
+  } catch (error) {
+    console.error('Database init error:', error)
+  }
 }
 
 // Filesystem - pro dev a fallback
@@ -75,17 +102,40 @@ function writeToFS(posts: BlogPost[]) {
   }
 }
 
-export async function getAllPosts(): Promise<BlogPost[]> {
-  const kv = await getKVClient()
+// Čtení z PostgreSQL
+async function readFromDB(): Promise<BlogPost[]> {
+  const pool = getPGPool()
+  if (!pool) return []
   
-  if (kv && process.env.KV_REST_API_URL) {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM blog_posts ORDER BY created_at DESC'
+    )
+    return result.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      content: row.content,
+      excerpt: row.excerpt,
+      author: row.author,
+      slug: row.slug,
+      createdAt: row.created_at.toISOString(),
+      updatedAt: row.updated_at.toISOString(),
+    }))
+  } catch (error) {
+    console.error('Database read error:', error)
+    return []
+  }
+}
+
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const pool = getPGPool()
+  
+  if (pool) {
     try {
-      const posts = await kv.get('blog-posts')
-      console.log('✅ Read from KV:', posts?.length || 0, 'posts')
-      return posts || []
+      await initDB()
+      return await readFromDB()
     } catch (error) {
-      console.error('❌ KV read error:', error)
-      // Fallback to filesystem
+      console.error('❌ Database error:', error)
       return readFromFS()
     }
   }
@@ -105,7 +155,7 @@ export async function getPostBySlugAsync(slug: string): Promise<BlogPost | null>
 
 export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): Promise<BlogPost> {
   try {
-    const kv = await getKVClient()
+    const pool = getPGPool()
     const allPosts = await getAllPosts()
     
     const slug = post.title
@@ -129,12 +179,15 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
       updatedAt: new Date().toISOString(),
     }
 
-    const posts = [...allPosts, newPost]
-    
-    if (kv && process.env.KV_REST_API_URL) {
-      await kv.set('blog-posts', posts)
-      console.log('✅ Post created in KV:', newPost.id, newPost.title)
+    if (pool) {
+      await initDB()
+      await pool.query(
+        'INSERT INTO blog_posts (id, title, content, excerpt, author, slug, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+        [newPost.id, newPost.title, newPost.content, newPost.excerpt, newPost.author, newPost.slug, newPost.createdAt, newPost.updatedAt]
+      )
+      console.log('✅ Post created in PostgreSQL:', newPost.id, newPost.title)
     } else {
+      const posts = [...allPosts, newPost]
       writeToFS(posts)
       console.log('✅ Post created in FS:', newPost.id, newPost.title)
     }
@@ -148,7 +201,7 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
 
 export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
   try {
-    const kv = await getKVClient()
+    const pool = getPGPool()
     const allPosts = await getAllPosts()
     const index = allPosts.findIndex(p => p.id === id)
     
@@ -160,13 +213,17 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
       updatedAt: new Date().toISOString(),
     }
 
-    allPosts[index] = updatedPost
-    
-    if (kv && process.env.KV_REST_API_URL) {
-      await kv.set('blog-posts', allPosts)
-      console.log('✅ Post updated in KV:', id)
+    if (pool) {
+      await initDB()
+      await pool.query(
+        'UPDATE blog_posts SET title=$1, content=$2, excerpt=$3, author=$4, updated_at=$5 WHERE id=$6',
+        [updatedPost.title, updatedPost.content, updatedPost.excerpt, updatedPost.author, updatedPost.updatedAt, id]
+      )
+      console.log('✅ Post updated in PostgreSQL:', id)
     } else {
-      writeToFS(allPosts)
+      const posts = [...allPosts]
+      posts[index] = updatedPost
+      writeToFS(posts)
       console.log('✅ Post updated in FS:', id)
     }
     
@@ -179,15 +236,16 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
 
 export async function deletePost(id: string): Promise<boolean> {
   try {
-    const kv = await getKVClient()
+    const pool = getPGPool()
     const allPosts = await getAllPosts()
     const filteredPosts = allPosts.filter(p => p.id !== id)
     
     if (filteredPosts.length === allPosts.length) return false
 
-    if (kv && process.env.KV_REST_API_URL) {
-      await kv.set('blog-posts', filteredPosts)
-      console.log('✅ Post deleted from KV:', id)
+    if (pool) {
+      await initDB()
+      await pool.query('DELETE FROM blog_posts WHERE id=$1', [id])
+      console.log('✅ Post deleted from PostgreSQL:', id)
     } else {
       writeToFS(filteredPosts)
       console.log('✅ Post deleted from FS:', id)
