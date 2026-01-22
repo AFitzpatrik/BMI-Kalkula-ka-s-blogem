@@ -1,4 +1,4 @@
-import { getPostBySlug, getAllPosts } from '@/lib/posts'
+import { getPostBySlugAsync, getAllPosts } from '@/lib/posts'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -7,7 +7,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 import AdBanner from '@/components/AdBanner'
 
 export async function generateStaticParams() {
-  const posts = getAllPosts()
+  const posts = await getAllPosts()
   return posts.map((post) => ({
     slug: post.slug,
   }))
@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPostBySlugAsync(slug)
   
   if (!post) {
     return {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPostBySlugAsync(slug)
 
   if (!post) {
     notFound()

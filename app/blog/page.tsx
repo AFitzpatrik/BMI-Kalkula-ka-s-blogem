@@ -9,8 +9,8 @@ export const metadata = {
   description: 'Články o zdraví, výživě a zdravém životním stylu',
 }
 
-export default function BlogPage() {
-  const posts = getAllPosts()
+export default async function BlogPage() {
+  const posts = await getAllPosts()
 
   return (
     <div className="container mx-auto px-4 py-12">

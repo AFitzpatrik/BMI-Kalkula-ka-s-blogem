@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import os from 'os'
 
 export interface BlogPost {
   id: string
@@ -13,15 +12,29 @@ export interface BlogPost {
   slug: string
 }
 
-// Vercel umožňuje psát do /tmp adresáře
-const postsDirectory = process.env.NODE_ENV === 'production' 
-  ? path.join('/tmp', 'posts-data')
-  : path.join(process.cwd(), 'data')
+// Používáme Vercel KV pro production, filesystem pro development
+let kv: any = null
 
+async function initKV() {
+  if (kv) return kv
+  
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      const { kv: vercelKv } = await import('@vercel/kv')
+      kv = vercelKv
+    }
+  } catch (error) {
+    console.log('KV not available, using filesystem')
+  }
+  
+  return kv
+}
+
+const postsDirectory = path.join(process.cwd(), 'data')
 const postsFile = path.join(postsDirectory, 'posts.json')
 
-// Zajistíme, že adresář existuje
-export function ensureDirectoryExists() {
+// Filesystem fallback
+function ensureDirectoryExists() {
   try {
     if (!fs.existsSync(postsDirectory)) {
       fs.mkdirSync(postsDirectory, { recursive: true })
@@ -31,11 +44,10 @@ export function ensureDirectoryExists() {
     }
   } catch (error) {
     console.error('Error ensuring directory exists:', error)
-    throw error
   }
 }
 
-export function getAllPosts(): BlogPost[] {
+function getLocalPosts(): BlogPost[] {
   try {
     ensureDirectoryExists()
     const fileContents = fs.readFileSync(postsFile, 'utf-8')
@@ -49,15 +61,41 @@ export function getAllPosts(): BlogPost[] {
   }
 }
 
+export async function getAllPosts(): Promise<BlogPost[]> {
+  try {
+    const kvInstance = await initKV()
+    
+    if (kvInstance && process.env.KV_REST_API_URL) {
+      try {
+        const posts = await kvInstance.get('blog-posts')
+        return posts || []
+      } catch (error) {
+        console.error('KV read error:', error)
+        return getLocalPosts()
+      }
+    }
+    
+    return getLocalPosts()
+  } catch (error) {
+    console.error('Error getting all posts:', error)
+    return getLocalPosts()
+  }
+}
+
 export function getPostBySlug(slug: string): BlogPost | null {
-  const posts = getAllPosts()
+  const posts = getLocalPosts()
   return posts.find(post => post.slug === slug) || null
 }
 
-export function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): BlogPost {
+export async function getPostBySlugAsync(slug: string): Promise<BlogPost | null> {
+  const posts = await getAllPosts()
+  return posts.find(post => post.slug === slug) || null
+}
+
+export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): Promise<BlogPost> {
   try {
-    ensureDirectoryExists()
-    const posts = getAllPosts()
+    const kvInstance = await initKV()
+    const allPosts = await getAllPosts()
     
     const slug = post.title
       .toLowerCase()
@@ -67,7 +105,7 @@ export function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'
     // Zajistíme unikátní slug
     let uniqueSlug = slug
     let counter = 1
-    while (posts.some(p => p.slug === uniqueSlug)) {
+    while (allPosts.some(p => p.slug === uniqueSlug)) {
       uniqueSlug = `${slug}-${counter}`
       counter++
     }
@@ -80,8 +118,14 @@ export function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'
       updatedAt: new Date().toISOString(),
     }
 
-    posts.push(newPost)
-    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
+    const posts = [...allPosts, newPost]
+    
+    if (kvInstance && process.env.KV_REST_API_URL) {
+      await kvInstance.set('blog-posts', posts)
+    } else {
+      ensureDirectoryExists()
+      fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
+    }
     
     console.log('Post created:', newPost.id)
     return newPost
@@ -91,22 +135,28 @@ export function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'
   }
 }
 
-export function updatePost(id: string, updates: Partial<BlogPost>): BlogPost | null {
+export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
   try {
-    ensureDirectoryExists()
-    const posts = getAllPosts()
-    const index = posts.findIndex(p => p.id === id)
+    const kvInstance = await initKV()
+    const allPosts = await getAllPosts()
+    const index = allPosts.findIndex(p => p.id === id)
     
     if (index === -1) return null
 
     const updatedPost: BlogPost = {
-      ...posts[index],
+      ...allPosts[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     }
 
-    posts[index] = updatedPost
-    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
+    allPosts[index] = updatedPost
+    
+    if (kvInstance && process.env.KV_REST_API_URL) {
+      await kvInstance.set('blog-posts', allPosts)
+    } else {
+      ensureDirectoryExists()
+      fs.writeFileSync(postsFile, JSON.stringify(allPosts, null, 2), 'utf-8')
+    }
     
     console.log('Post updated:', id)
     return updatedPost
@@ -116,15 +166,21 @@ export function updatePost(id: string, updates: Partial<BlogPost>): BlogPost | n
   }
 }
 
-export function deletePost(id: string): boolean {
+export async function deletePost(id: string): Promise<boolean> {
   try {
-    ensureDirectoryExists()
-    const posts = getAllPosts()
-    const filteredPosts = posts.filter(p => p.id !== id)
+    const kvInstance = await initKV()
+    const allPosts = await getAllPosts()
+    const filteredPosts = allPosts.filter(p => p.id !== id)
     
-    if (filteredPosts.length === posts.length) return false
+    if (filteredPosts.length === allPosts.length) return false
 
-    fs.writeFileSync(postsFile, JSON.stringify(filteredPosts, null, 2), 'utf-8')
+    if (kvInstance && process.env.KV_REST_API_URL) {
+      await kvInstance.set('blog-posts', filteredPosts)
+    } else {
+      ensureDirectoryExists()
+      fs.writeFileSync(postsFile, JSON.stringify(filteredPosts, null, 2), 'utf-8')
+    }
+    
     console.log('Post deleted:', id)
     return true
   } catch (error) {

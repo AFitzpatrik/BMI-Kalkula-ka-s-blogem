@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllPosts, createPost, updatePost, deletePost, ensureDirectoryExists } from '@/lib/posts'
-
-// Inicializovat při prvním requestu
-ensureDirectoryExists()
+import { getAllPosts, createPost, updatePost, deletePost } from '@/lib/posts'
 
 export async function GET() {
   try {
-    const posts = getAllPosts()
+    const posts = await getAllPosts()
     return NextResponse.json(posts)
   } catch (error) {
     console.error('GET error:', error)
@@ -29,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const post = createPost({ title, content, excerpt, author })
+    const post = await createPost({ title, content, excerpt, author })
     return NextResponse.json(post, { status: 201 })
   } catch (error) {
     console.error('POST error:', error)
@@ -52,7 +49,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const post = updatePost(id, updates)
+    const post = await updatePost(id, updates)
     if (!post) {
       return NextResponse.json(
         { error: 'Článek nebyl nalezen' },
@@ -82,7 +79,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const success = deletePost(id)
+    const success = await deletePost(id)
     if (!success) {
       return NextResponse.json(
         { error: 'Článek nebyl nalezen' },
