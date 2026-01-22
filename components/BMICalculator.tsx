@@ -68,13 +68,13 @@ export default function BMICalculator() {
 
     if (bmi < 18.5) {
       category = 'Podváha'
-      color = 'green'
+      color = 'blue'
       description = isWoman 
         ? 'Máte podváhu. Pro ženy je ideální BMI 18.5-24.9. Zvažte konzultaci s lékařem o zdravém přibírání.'
         : 'Máte podváhu. Pro muže je ideální BMI 18.5-24.9. Zvažte konzultaci s lékařem o zdravém přibírání.'
     } else if (bmi < 25) {
       category = 'Normální váha'
-      color = 'blue'
+      color = 'green'
       description = isWoman
         ? 'Gratulujeme! Máte zdravou tělesnou hmotnost. Pro ženy je ideální rozmezí BMI 18.5-24.9.'
         : 'Gratulujeme! Máte zdravou tělesnou hmotnost. Pro muže je ideální rozmezí BMI 18.5-24.9.'
