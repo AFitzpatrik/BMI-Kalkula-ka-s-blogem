@@ -12,28 +12,10 @@ export interface BlogPost {
   slug: string
 }
 
-// Používáme Vercel KV pro production, filesystem pro development
-let kv: any = null
-
-async function initKV() {
-  if (kv) return kv
-  
-  try {
-    if (process.env.NODE_ENV === 'production') {
-      const { kv: vercelKv } = await import('@vercel/kv')
-      kv = vercelKv
-    }
-  } catch (error) {
-    console.log('KV not available, using filesystem')
-  }
-  
-  return kv
-}
-
 const postsDirectory = path.join(process.cwd(), 'data')
 const postsFile = path.join(postsDirectory, 'posts.json')
 
-// Filesystem fallback
+// Zajistíme, že adresář existuje
 function ensureDirectoryExists() {
   try {
     if (!fs.existsSync(postsDirectory)) {
@@ -47,7 +29,8 @@ function ensureDirectoryExists() {
   }
 }
 
-function getLocalPosts(): BlogPost[] {
+// Vždycky čteme z filesystem (nejspolehlivější)
+export async function getAllPosts(): Promise<BlogPost[]> {
   try {
     ensureDirectoryExists()
     const fileContents = fs.readFileSync(postsFile, 'utf-8')
@@ -61,41 +44,27 @@ function getLocalPosts(): BlogPost[] {
   }
 }
 
-export async function getAllPosts(): Promise<BlogPost[]> {
+export function getPostBySlug(slug: string): BlogPost | null {
   try {
-    const kvInstance = await initKV()
-    
-    if (kvInstance && process.env.KV_REST_API_URL) {
-      try {
-        const posts = await kvInstance.get('blog-posts')
-        return posts || []
-      } catch (error) {
-        console.error('KV read error:', error)
-        return getLocalPosts()
-      }
-    }
-    
-    return getLocalPosts()
+    ensureDirectoryExists()
+    const fileContents = fs.readFileSync(postsFile, 'utf-8')
+    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
+    return posts.find(post => post.slug === slug) || null
   } catch (error) {
-    console.error('Error getting all posts:', error)
-    return getLocalPosts()
+    console.error('Error reading post:', error)
+    return null
   }
 }
 
-export function getPostBySlug(slug: string): BlogPost | null {
-  const posts = getLocalPosts()
-  return posts.find(post => post.slug === slug) || null
-}
-
 export async function getPostBySlugAsync(slug: string): Promise<BlogPost | null> {
-  const posts = await getAllPosts()
-  return posts.find(post => post.slug === slug) || null
+  return getPostBySlug(slug)
 }
 
 export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): Promise<BlogPost> {
   try {
-    const kvInstance = await initKV()
-    const allPosts = await getAllPosts()
+    ensureDirectoryExists()
+    const fileContents = fs.readFileSync(postsFile, 'utf-8')
+    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
     
     const slug = post.title
       .toLowerCase()
@@ -105,7 +74,7 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
     // Zajistíme unikátní slug
     let uniqueSlug = slug
     let counter = 1
-    while (allPosts.some(p => p.slug === uniqueSlug)) {
+    while (posts.some(p => p.slug === uniqueSlug)) {
       uniqueSlug = `${slug}-${counter}`
       counter++
     }
@@ -118,73 +87,57 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
       updatedAt: new Date().toISOString(),
     }
 
-    const posts = [...allPosts, newPost]
+    posts.push(newPost)
+    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
     
-    if (kvInstance && process.env.KV_REST_API_URL) {
-      await kvInstance.set('blog-posts', posts)
-    } else {
-      ensureDirectoryExists()
-      fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
-    }
-    
-    console.log('Post created:', newPost.id)
+    console.log('✅ Post created:', newPost.id, newPost.title)
     return newPost
   } catch (error) {
-    console.error('Error creating post:', error)
+    console.error('❌ Error creating post:', error)
     throw error
   }
 }
 
 export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
   try {
-    const kvInstance = await initKV()
-    const allPosts = await getAllPosts()
-    const index = allPosts.findIndex(p => p.id === id)
+    ensureDirectoryExists()
+    const fileContents = fs.readFileSync(postsFile, 'utf-8')
+    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
+    const index = posts.findIndex(p => p.id === id)
     
     if (index === -1) return null
 
     const updatedPost: BlogPost = {
-      ...allPosts[index],
+      ...posts[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     }
 
-    allPosts[index] = updatedPost
+    posts[index] = updatedPost
+    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
     
-    if (kvInstance && process.env.KV_REST_API_URL) {
-      await kvInstance.set('blog-posts', allPosts)
-    } else {
-      ensureDirectoryExists()
-      fs.writeFileSync(postsFile, JSON.stringify(allPosts, null, 2), 'utf-8')
-    }
-    
-    console.log('Post updated:', id)
+    console.log('✅ Post updated:', id)
     return updatedPost
   } catch (error) {
-    console.error('Error updating post:', error)
+    console.error('❌ Error updating post:', error)
     throw error
   }
 }
 
 export async function deletePost(id: string): Promise<boolean> {
   try {
-    const kvInstance = await initKV()
-    const allPosts = await getAllPosts()
-    const filteredPosts = allPosts.filter(p => p.id !== id)
+    ensureDirectoryExists()
+    const fileContents = fs.readFileSync(postsFile, 'utf-8')
+    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
+    const filteredPosts = posts.filter(p => p.id !== id)
     
-    if (filteredPosts.length === allPosts.length) return false
+    if (filteredPosts.length === posts.length) return false
 
-    if (kvInstance && process.env.KV_REST_API_URL) {
-      await kvInstance.set('blog-posts', filteredPosts)
-    } else {
-      ensureDirectoryExists()
-      fs.writeFileSync(postsFile, JSON.stringify(filteredPosts, null, 2), 'utf-8')
-    }
-    
-    console.log('Post deleted:', id)
+    fs.writeFileSync(postsFile, JSON.stringify(filteredPosts, null, 2), 'utf-8')
+    console.log('✅ Post deleted:', id)
     return true
   } catch (error) {
-    console.error('Error deleting post:', error)
+    console.error('❌ Error deleting post:', error)
     throw error
   }
 }
