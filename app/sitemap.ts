@@ -3,7 +3,7 @@ import { getAllPosts } from '@/lib/posts'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getAllPosts()
-  const baseUrl = 'https://your-domain.com' // Nahraďte svou doménou
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://bmi-kalkula-ka-s-blogem-git-main-patriks-projects-e4ad545d.vercel.app'
 
   const postUrls = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
