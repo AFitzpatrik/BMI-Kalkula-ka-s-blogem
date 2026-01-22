@@ -15,7 +15,27 @@ export interface BlogPost {
 const postsDirectory = path.join(process.cwd(), 'data')
 const postsFile = path.join(postsDirectory, 'posts.json')
 
-// Zajistíme, že adresář existuje
+// KV instance
+let kvClient: any = null
+
+async function getKVClient() {
+  if (kvClient) return kvClient
+  
+  // Jen na produkci a pokud jsou dostupné KV proměnné
+  if (process.env.NODE_ENV === 'production' && process.env.KV_REST_API_URL) {
+    try {
+      const { kv } = await import('@vercel/kv')
+      kvClient = kv
+      console.log('✅ Using Vercel KV for storage')
+      return kvClient
+    } catch (error) {
+      console.error('KV not available, falling back to filesystem:', error)
+    }
+  }
+  return null
+}
+
+// Filesystem - pro dev a fallback
 function ensureDirectoryExists() {
   try {
     if (!fs.existsSync(postsDirectory)) {
@@ -29,8 +49,8 @@ function ensureDirectoryExists() {
   }
 }
 
-// Vždycky čteme z filesystem (nejspolehlivější)
-export async function getAllPosts(): Promise<BlogPost[]> {
+// Čtení z filesystem
+function readFromFS(): BlogPost[] {
   try {
     ensureDirectoryExists()
     const fileContents = fs.readFileSync(postsFile, 'utf-8')
@@ -39,32 +59,54 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
   } catch (error) {
-    console.error('Error reading posts:', error)
+    console.error('Error reading from filesystem:', error)
     return []
   }
 }
 
-export function getPostBySlug(slug: string): BlogPost | null {
+// Psaní do filesystem
+function writeToFS(posts: BlogPost[]) {
   try {
     ensureDirectoryExists()
-    const fileContents = fs.readFileSync(postsFile, 'utf-8')
-    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
-    return posts.find(post => post.slug === slug) || null
+    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
   } catch (error) {
-    console.error('Error reading post:', error)
-    return null
+    console.error('Error writing to filesystem:', error)
+    throw error
   }
 }
 
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const kv = await getKVClient()
+  
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      const posts = await kv.get('blog-posts')
+      console.log('✅ Read from KV:', posts?.length || 0, 'posts')
+      return posts || []
+    } catch (error) {
+      console.error('❌ KV read error:', error)
+      // Fallback to filesystem
+      return readFromFS()
+    }
+  }
+  
+  // Dev mode - use filesystem
+  return readFromFS()
+}
+export function getPostBySlug(slug: string): BlogPost | null {
+  const posts = readFromFS()
+  return posts.find(post => post.slug === slug) || null
+}
+
 export async function getPostBySlugAsync(slug: string): Promise<BlogPost | null> {
-  return getPostBySlug(slug)
+  const posts = await getAllPosts()
+  return posts.find(post => post.slug === slug) || null
 }
 
 export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): Promise<BlogPost> {
   try {
-    ensureDirectoryExists()
-    const fileContents = fs.readFileSync(postsFile, 'utf-8')
-    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
+    const kv = await getKVClient()
+    const allPosts = await getAllPosts()
     
     const slug = post.title
       .toLowerCase()
@@ -74,7 +116,7 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
     // Zajistíme unikátní slug
     let uniqueSlug = slug
     let counter = 1
-    while (posts.some(p => p.slug === uniqueSlug)) {
+    while (allPosts.some(p => p.slug === uniqueSlug)) {
       uniqueSlug = `${slug}-${counter}`
       counter++
     }
@@ -87,10 +129,16 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
       updatedAt: new Date().toISOString(),
     }
 
-    posts.push(newPost)
-    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
+    const posts = [...allPosts, newPost]
     
-    console.log('✅ Post created:', newPost.id, newPost.title)
+    if (kv && process.env.KV_REST_API_URL) {
+      await kv.set('blog-posts', posts)
+      console.log('✅ Post created in KV:', newPost.id, newPost.title)
+    } else {
+      writeToFS(posts)
+      console.log('✅ Post created in FS:', newPost.id, newPost.title)
+    }
+    
     return newPost
   } catch (error) {
     console.error('❌ Error creating post:', error)
@@ -100,23 +148,28 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
 
 export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
   try {
-    ensureDirectoryExists()
-    const fileContents = fs.readFileSync(postsFile, 'utf-8')
-    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
-    const index = posts.findIndex(p => p.id === id)
+    const kv = await getKVClient()
+    const allPosts = await getAllPosts()
+    const index = allPosts.findIndex(p => p.id === id)
     
     if (index === -1) return null
 
     const updatedPost: BlogPost = {
-      ...posts[index],
+      ...allPosts[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     }
 
-    posts[index] = updatedPost
-    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
+    allPosts[index] = updatedPost
     
-    console.log('✅ Post updated:', id)
+    if (kv && process.env.KV_REST_API_URL) {
+      await kv.set('blog-posts', allPosts)
+      console.log('✅ Post updated in KV:', id)
+    } else {
+      writeToFS(allPosts)
+      console.log('✅ Post updated in FS:', id)
+    }
+    
     return updatedPost
   } catch (error) {
     console.error('❌ Error updating post:', error)
@@ -126,15 +179,20 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
 
 export async function deletePost(id: string): Promise<boolean> {
   try {
-    ensureDirectoryExists()
-    const fileContents = fs.readFileSync(postsFile, 'utf-8')
-    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
-    const filteredPosts = posts.filter(p => p.id !== id)
+    const kv = await getKVClient()
+    const allPosts = await getAllPosts()
+    const filteredPosts = allPosts.filter(p => p.id !== id)
     
-    if (filteredPosts.length === posts.length) return false
+    if (filteredPosts.length === allPosts.length) return false
 
-    fs.writeFileSync(postsFile, JSON.stringify(filteredPosts, null, 2), 'utf-8')
-    console.log('✅ Post deleted:', id)
+    if (kv && process.env.KV_REST_API_URL) {
+      await kv.set('blog-posts', filteredPosts)
+      console.log('✅ Post deleted from KV:', id)
+    } else {
+      writeToFS(filteredPosts)
+      console.log('✅ Post deleted from FS:', id)
+    }
+    
     return true
   } catch (error) {
     console.error('❌ Error deleting post:', error)
