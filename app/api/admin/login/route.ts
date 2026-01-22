@@ -9,7 +9,14 @@ export async function POST(request: NextRequest) {
     // Získat heslo z environment variable
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
 
-    if (!password || password !== adminPassword) {
+    // Debug logging (jen v development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Received password length:', password?.length)
+      console.log('Expected password length:', adminPassword?.length)
+      console.log('Passwords match:', password === adminPassword)
+    }
+
+    if (!password || password.trim() !== adminPassword.trim()) {
       return NextResponse.json(
         { error: 'Nesprávné heslo' },
         { status: 401 }
