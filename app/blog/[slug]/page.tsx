@@ -6,6 +6,9 @@ import { cs } from 'date-fns/locale/cs'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import AdBanner from '@/components/AdBanner'
 
+// Revalidate - ISR (Incremental Static Regeneration)
+export const revalidate = 60 // Revalidovat každých 60 sekund
+
 export async function generateStaticParams() {
   const posts = await getAllPosts()
   return posts.map((post) => ({

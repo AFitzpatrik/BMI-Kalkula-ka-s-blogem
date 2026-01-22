@@ -4,6 +4,9 @@ import { format } from 'date-fns'
 import { cs } from 'date-fns/locale/cs'
 import AdBanner from '@/components/AdBanner'
 
+// Revalidate - ISR (Incremental Static Regeneration)
+export const revalidate = 60 // Revalidovat každých 60 sekund
+
 export const metadata = {
   title: 'Blog | BMI Kalkulačka',
   description: 'Články o zdraví, výživě a zdravém životním stylu',
