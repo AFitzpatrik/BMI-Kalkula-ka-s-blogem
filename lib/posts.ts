@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
 
 export interface BlogPost {
   id: string
@@ -12,7 +13,11 @@ export interface BlogPost {
   slug: string
 }
 
-const postsDirectory = path.join(process.cwd(), 'data')
+// Vercel umožňuje psát do /tmp adresáře
+const postsDirectory = process.env.NODE_ENV === 'production' 
+  ? path.join('/tmp', 'posts-data')
+  : path.join(process.cwd(), 'data')
+
 const postsFile = path.join(postsDirectory, 'posts.json')
 
 // Zajistíme, že adresář existuje
@@ -26,6 +31,7 @@ export function ensureDirectoryExists() {
     }
   } catch (error) {
     console.error('Error ensuring directory exists:', error)
+    throw error
   }
 }
 
@@ -77,6 +83,7 @@ export function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'
     posts.push(newPost)
     fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
     
+    console.log('Post created:', newPost.id)
     return newPost
   } catch (error) {
     console.error('Error creating post:', error)
@@ -101,6 +108,7 @@ export function updatePost(id: string, updates: Partial<BlogPost>): BlogPost | n
     posts[index] = updatedPost
     fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
     
+    console.log('Post updated:', id)
     return updatedPost
   } catch (error) {
     console.error('Error updating post:', error)
@@ -117,6 +125,7 @@ export function deletePost(id: string): boolean {
     if (filteredPosts.length === posts.length) return false
 
     fs.writeFileSync(postsFile, JSON.stringify(filteredPosts, null, 2), 'utf-8')
+    console.log('Post deleted:', id)
     return true
   } catch (error) {
     console.error('Error deleting post:', error)

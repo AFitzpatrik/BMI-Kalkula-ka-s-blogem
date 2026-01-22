@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllPosts, createPost, updatePost, deletePost } from '@/lib/posts'
+import { getAllPosts, createPost, updatePost, deletePost, ensureDirectoryExists } from '@/lib/posts'
+
+// Inicializovat při prvním requestu
+ensureDirectoryExists()
 
 export async function GET() {
   try {
@@ -8,7 +11,7 @@ export async function GET() {
   } catch (error) {
     console.error('GET error:', error)
     return NextResponse.json(
-      { error: 'Chyba při načítání článků' },
+      { error: 'Chyba při načítání článků', details: String(error) },
       { status: 500 }
     )
   }
