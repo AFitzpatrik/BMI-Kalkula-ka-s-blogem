@@ -9,12 +9,14 @@ export async function POST(request: NextRequest) {
     // Získat heslo z environment variable
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
 
-    // Debug logging (jen v development)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Received password length:', password?.length)
-      console.log('Expected password length:', adminPassword?.length)
-      console.log('Passwords match:', password === adminPassword)
-    }
+    // Debug logging (vždy pro debugging)
+    console.log('=== LOGIN DEBUG ===')
+    console.log('Received password length:', password?.length)
+    console.log('Expected password length:', adminPassword?.length)
+    console.log('Passwords match:', password === adminPassword)
+    console.log('Received password (first 5 chars):', password?.substring(0, 5))
+    console.log('Expected password (first 5 chars):', adminPassword?.substring(0, 5))
+    console.log('==================')
 
     if (!password || password.trim() !== adminPassword.trim()) {
       return NextResponse.json(
