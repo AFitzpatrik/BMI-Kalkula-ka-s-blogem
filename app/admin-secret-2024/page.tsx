@@ -84,33 +84,42 @@ export default function AdminPage() {
         const response = await fetch('/api/posts', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ id: editingPost.id, ...formData }),
         })
 
+        const data = await response.json()
+        
         if (response.ok) {
           showMessage('success', 'Článek byl úspěšně aktualizován')
           resetForm()
-          loadPosts()
+          await loadPosts()
         } else {
-          showMessage('error', 'Chyba při aktualizaci článku')
+          showMessage('error', data.error || 'Chyba při aktualizaci článku')
+          console.error('Update error:', data)
         }
       } else {
         const response = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(formData),
         })
 
+        const data = await response.json()
+        
         if (response.ok) {
           showMessage('success', 'Článek byl úspěšně vytvořen')
           resetForm()
-          loadPosts()
+          await loadPosts()
         } else {
-          showMessage('error', 'Chyba při vytváření článku')
+          showMessage('error', data.error || 'Chyba při vytváření článku')
+          console.error('Create error:', data)
         }
       }
     } catch (error) {
-      showMessage('error', 'Chyba při ukládání článku')
+      showMessage('error', `Chyba při ukládání článku: ${error}`)
+      console.error('Submit error:', error)
     }
   }
 
@@ -131,16 +140,21 @@ export default function AdminPage() {
     try {
       const response = await fetch(`/api/posts?id=${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
+
+      const data = await response.json()
 
       if (response.ok) {
         showMessage('success', 'Článek byl úspěšně smazán')
-        loadPosts()
+        await loadPosts()
       } else {
-        showMessage('error', 'Chyba při mazání článku')
+        showMessage('error', data.error || 'Chyba při mazání článku')
+        console.error('Delete error:', data)
       }
     } catch (error) {
-      showMessage('error', 'Chyba při mazání článku')
+      showMessage('error', `Chyba při mazání článku: ${error}`)
+      console.error('Delete error:', error)
     }
   }
 

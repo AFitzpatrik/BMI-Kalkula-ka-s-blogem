@@ -6,6 +6,7 @@ export async function GET() {
     const posts = getAllPosts()
     return NextResponse.json(posts)
   } catch (error) {
+    console.error('GET error:', error)
     return NextResponse.json(
       { error: 'Chyba při načítání článků' },
       { status: 500 }
@@ -28,8 +29,9 @@ export async function POST(request: NextRequest) {
     const post = createPost({ title, content, excerpt, author })
     return NextResponse.json(post, { status: 201 })
   } catch (error) {
+    console.error('POST error:', error)
     return NextResponse.json(
-      { error: 'Chyba při vytváření článku' },
+      { error: 'Chyba při vytváření článku', details: String(error) },
       { status: 500 }
     )
   }
@@ -57,8 +59,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(post)
   } catch (error) {
+    console.error('PUT error:', error)
     return NextResponse.json(
-      { error: 'Chyba při aktualizaci článku' },
+      { error: 'Chyba při aktualizaci článku', details: String(error) },
       { status: 500 }
     )
   }
@@ -86,8 +89,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('DELETE error:', error)
     return NextResponse.json(
-      { error: 'Chyba při mazání článku' },
+      { error: 'Chyba při mazání článku', details: String(error) },
       { status: 500 }
     )
   }
