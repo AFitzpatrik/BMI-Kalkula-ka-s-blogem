@@ -35,12 +35,22 @@ export async function POST(request: NextRequest) {
 
     // Uložit token do cookie
     const response = NextResponse.json({ success: true, token })
+    
+    // Nastavit cookie s lepšími parametry pro produkci
+    const isProduction = process.env.NODE_ENV === 'production'
     response.cookies.set('admin_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction, // HTTPS v produkci
+      sameSite: 'lax', // 'lax' funguje lépe než 'none' (nevyžaduje secure)
       maxAge: 60 * 60 * 24, // 24 hodin
       path: '/',
+    })
+
+    console.log('Cookie set:', {
+      hasToken: !!token,
+      tokenLength: token?.length,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax'
     })
 
     return response

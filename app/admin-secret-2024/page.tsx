@@ -32,14 +32,21 @@ export default function AdminPage() {
     // Ověřit, že je uživatel přihlášen
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/admin/verify')
-        if (!response.ok) {
-          router.push('/admin-secret-2024/login')
+        const response = await fetch('/api/admin/verify', {
+          credentials: 'include', // Zajistit, že cookies jsou poslány
+        })
+        const data = await response.json()
+        console.log('Auth check:', { ok: response.ok, valid: data.valid })
+        
+        if (!response.ok || !data.valid) {
+          console.log('Auth failed, redirecting to login')
+          window.location.href = '/admin-secret-2024/login'
           return
         }
         loadPosts()
       } catch (error) {
-        router.push('/admin-secret-2024/login')
+        console.error('Auth check error:', error)
+        window.location.href = '/admin-secret-2024/login'
       }
     }
     checkAuth()

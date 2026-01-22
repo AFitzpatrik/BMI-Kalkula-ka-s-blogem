@@ -20,14 +20,22 @@ export default function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
+        credentials: 'include', // Zajistit, že cookies jsou poslány a přijaty
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log('Login successful, token received:', data.token ? 'Yes' : 'No')
+        
+        // Počkat chvíli, aby se cookie uložila
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         // Token je uložen v cookie automaticky
-        router.push('/admin-secret-2024')
-        router.refresh()
+        // Použít window.location místo router.push pro lepší cookie handling
+        window.location.href = '/admin-secret-2024'
       } else {
         const errorData = await response.json()
+        console.error('Login failed:', errorData)
         setError(errorData.error || 'Nesprávné heslo')
       }
     } catch (error) {

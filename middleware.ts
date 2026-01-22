@@ -6,12 +6,14 @@ export function middleware(request: NextRequest) {
 
   // Ochrana CMS stránky
   if (pathname.startsWith('/admin-secret-2024')) {
-    // Povolit přístup k login stránce
-    if (pathname === '/admin-secret-2024/login') {
+    // Povolit přístup k login stránce a API routes
+    if (pathname === '/admin-secret-2024/login' || pathname.startsWith('/api/')) {
       return NextResponse.next()
     }
 
     // Zkontrolovat token v cookie
+    // V Edge Runtime nemůžeme použít jsonwebtoken, takže jen kontrolujeme přítomnost
+    // Skutečné ověření proběhne v API route /api/admin/verify
     const token = request.cookies.get('admin_token')?.value
 
     if (!token) {
@@ -20,8 +22,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Token je přítomen - přesměrovat na API route pro ověření
-    // Skutečné ověření proběhne v API route, middleware jen kontroluje přítomnost
+    // Token je přítomen - nechat projít, ověření proběhne v API route
     return NextResponse.next()
   }
 
