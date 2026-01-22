@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { BlogPost } from '@/lib/posts'
 import RichTextEditor from '@/components/RichTextEditor'
-import AdBanner from '@/components/AdBanner'
 
 export default function AdminPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -128,16 +127,6 @@ export default function AdminPage() {
           <p className="text-xl text-gray-600">
             Přidávejte a spravujte články na blog
           </p>
-        </div>
-
-        {/* Náhled reklamního banneru - kde bude v produkci */}
-        <div className="mb-8 card bg-yellow-50 border-2 border-yellow-300">
-          <div className="text-center mb-4">
-            <p className="text-sm font-semibold text-yellow-800 mb-2">
-              📢 Náhled reklamního banneru (zde bude v produkci)
-            </p>
-            <AdBanner />
-          </div>
         </div>
 
         {message && (

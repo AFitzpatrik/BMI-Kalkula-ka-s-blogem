@@ -7,18 +7,26 @@ import AdBanner from '@/components/AdBanner'
 export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            BMI Kalkulačka
-          </h1>
-          <p className="text-xl text-gray-600">
-            Vypočítejte si svůj Body Mass Index jednoduše a rychle
-          </p>
-        </div>
-        <BMICalculator />
-        <AdBanner />
-        <div className="mt-12 card">
+      <div className="flex gap-8 max-w-7xl mx-auto">
+        {/* Levý sidebar s reklamou */}
+        <aside className="hidden md:block w-48 lg:w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <AdBanner />
+          </div>
+        </aside>
+
+        {/* Hlavní obsah */}
+        <div className="flex-1 max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              BMI Kalkulačka
+            </h1>
+            <p className="text-xl text-gray-600">
+              Vypočítejte si svůj Body Mass Index jednoduše a rychle
+            </p>
+          </div>
+          <BMICalculator />
+          <div className="mt-12 card">
           <h2 className="text-2xl font-bold mb-4 text-gray-900">
             Co je BMI?
           </h2>
@@ -52,6 +60,14 @@ export default function Home() {
             </li>
           </ul>
         </div>
+        </div>
+
+        {/* Pravý sidebar s reklamou */}
+        <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <AdBanner />
+          </div>
+        </aside>
       </div>
     </div>
   )

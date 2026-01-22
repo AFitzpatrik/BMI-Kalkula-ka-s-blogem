@@ -2,6 +2,7 @@ import { getAllPosts } from '@/lib/posts'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { cs } from 'date-fns/locale/cs'
+import AdBanner from '@/components/AdBanner'
 
 export const metadata = {
   title: 'Blog | BMI Kalkulačka',
@@ -13,15 +14,24 @@ export default function BlogPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Blog
-          </h1>
-          <p className="text-xl text-gray-600">
-            Články o zdraví, výživě a zdravém životním stylu
-          </p>
-        </div>
+      <div className="flex gap-8 max-w-7xl mx-auto">
+        {/* Levý sidebar s reklamou */}
+        <aside className="hidden md:block w-48 lg:w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <AdBanner />
+          </div>
+        </aside>
+
+        {/* Hlavní obsah */}
+        <div className="flex-1 max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              Blog
+            </h1>
+            <p className="text-xl text-gray-600">
+              Články o zdraví, výživě a zdravém životním stylu
+            </p>
+          </div>
 
         {posts.length === 0 ? (
           <div className="card text-center py-12">
@@ -62,6 +72,14 @@ export default function BlogPage() {
             ))}
           </div>
         )}
+        </div>
+
+        {/* Pravý sidebar s reklamou */}
+        <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <AdBanner />
+          </div>
+        </aside>
       </div>
     </div>
   )

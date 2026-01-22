@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { cs } from 'date-fns/locale/cs'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import AdBanner from '@/components/AdBanner'
 
 export async function generateStaticParams() {
   const posts = getAllPosts()
@@ -38,15 +39,24 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-3xl mx-auto">
-        <Link
-          href="/blog"
-          className="text-primary-600 hover:text-primary-700 mb-6 inline-block"
-        >
-          ← Zpět na blog
-        </Link>
+      <div className="flex gap-8 max-w-7xl mx-auto">
+        {/* Levý sidebar s reklamou */}
+        <aside className="hidden md:block w-48 lg:w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <AdBanner />
+          </div>
+        </aside>
 
-        <article className="card">
+        {/* Hlavní obsah */}
+        <div className="flex-1 max-w-3xl mx-auto">
+          <Link
+            href="/blog"
+            className="text-primary-600 hover:text-primary-700 mb-6 inline-block"
+          >
+            ← Zpět na blog
+          </Link>
+
+          <article className="card">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {post.title}
           </h1>
@@ -68,7 +78,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
 
           <MarkdownRenderer content={post.content} />
-        </article>
+          </article>
+        </div>
+
+        {/* Pravý sidebar s reklamou */}
+        <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <AdBanner />
+          </div>
+        </aside>
       </div>
     </div>
   )
