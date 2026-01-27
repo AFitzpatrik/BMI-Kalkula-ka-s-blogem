@@ -38,25 +38,25 @@ export default function Home() {
             BMI kategorie:
           </h3>
           <ul className="space-y-2 text-gray-700">
-            <li className="flex items-center whitespace-nowrap">
+            <li className="flex items-center">
               <span className="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
-              <strong>Podváha: </strong>BMI méně než 18.5
+              <span><strong>Podváha:</strong> BMI méně než 18.5</span>
             </li>
-            <li className="flex items-center whitespace-nowrap">
+            <li className="flex items-center">
               <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-              <strong>Normální váha: </strong>BMI 18.5 - 24.9
+              <span><strong>Normální váha:</strong> BMI 18.5 - 24.9</span>
             </li>
-            <li className="flex items-center whitespace-nowrap">
+            <li className="flex items-center">
               <span className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></span>
-              <strong>Nadváha: </strong>BMI 25 - 29.9
+              <span><strong>Nadváha:</strong> BMI 25 - 29.9</span>
             </li>
-            <li className="flex items-center whitespace-nowrap">
+            <li className="flex items-center">
               <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-              <strong>Obezita 1. stupně: </strong>BMI 30 - 34.9
+              <span><strong>Obezita 1. stupně:</strong> BMI 30 - 34.9</span>
             </li>
-            <li className="flex items-center whitespace-nowrap">
+            <li className="flex items-center">
               <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
-              <strong>Obezita 2. stupně: </strong>BMI 35 a více
+              <span><strong>Obezita 2. stupně:</strong> BMI 35 a více</span>
             </li>
           </ul>
         </div>
