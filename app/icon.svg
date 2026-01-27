@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fitmateo FM">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f4f8ff" />
+      <stop offset="100%" stop-color="#e4edff" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#bg)" />
+  <path fill="#0a5bff" d="M64 116h124v64h-64v48h64v64h-64v108h-60z" />
+  <path fill="#0a5bff" d="M216 390V116h64l52 132 52-132h64v274h-64V226l-52 138-52-138v164z" />
+</svg>
