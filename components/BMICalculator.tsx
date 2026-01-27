@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import BMIHorizontalGauge from './BMIHorizontalGauge'
 
 interface BMIResult {
   value: number
@@ -213,6 +214,12 @@ export default function BMICalculator() {
               }`}>
                 {result.category}
               </p>
+              
+              {/* Horizontální stupnice */}
+              <div className="my-6 px-4">
+                <BMIHorizontalGauge bmi={result.value} />
+              </div>
+              
               <p className="text-gray-700">{result.description}</p>
             </div>
           </div>
