@@ -13,7 +13,7 @@ export default function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="text-2xl font-bold text-primary-600">
-            BMI Kalkulačka
+            FitMateo
           </Link>
           <div className="flex space-x-6">
             <Link
@@ -24,7 +24,7 @@ export default function Navigation() {
                   : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
               }`}
             >
-              Kalkulačka
+              BMI Kalkulačka
             </Link>
             <Link
               href="/blog"

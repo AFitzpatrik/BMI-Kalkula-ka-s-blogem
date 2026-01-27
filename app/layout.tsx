@@ -7,12 +7,12 @@ import Script from 'next/script'
 const inter = Inter({ subsets: ['latin', 'latin-ext'] })
 
 export const metadata: Metadata = {
-  title: 'BMI Kalkulačka | Vypočítejte si svůj Body Mass Index',
+  title: 'FitMateo | Vypočítejte si svůj Body Mass Index',
   description: 'Jednoduchá a přesná BMI kalkulačka. Vypočítejte si svůj Body Mass Index a zjistěte více o zdravém životním stylu v našem blogu.',
   keywords: 'BMI, kalkulačka, Body Mass Index, zdraví, hubnutí, váha',
-  authors: [{ name: 'BMI Calculator' }],
+  authors: [{ name: 'FitMateo' }],
   openGraph: {
-    title: 'BMI Kalkulačka',
+    title: 'FitMateo',
     description: 'Vypočítejte si svůj Body Mass Index',
     type: 'website',
   },
@@ -40,7 +40,7 @@ export default function RootLayout({
         </main>
         <footer className="bg-gray-900 text-white py-8 mt-16">
           <div className="container mx-auto px-4 text-center">
-            <p>&copy; 2024 BMI Kalkulačka. Všechna práva vyhrazena.</p>
+            <p>&copy; 2024 FitMateo. Všechna práva vyhrazena.</p>
           </div>
         </footer>
       </body>
