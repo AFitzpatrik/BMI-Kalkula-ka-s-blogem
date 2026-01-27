@@ -39,11 +39,11 @@ export default function Home() {
           </h3>
           <ul className="space-y-2 text-gray-700">
             <li className="flex items-center">
-              <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+              <span className="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
               <strong>Podváha:</strong> BMI méně než 18.5
             </li>
             <li className="flex items-center">
-              <span className="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+              <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
               <strong>Normální váha:</strong> BMI 18.5 - 24.9
             </li>
             <li className="flex items-center">
