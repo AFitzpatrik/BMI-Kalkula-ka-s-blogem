@@ -36,6 +36,16 @@ export default function Navigation() {
             >
               Blog
             </Link>
+            <Link
+              href="/cviky"
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('/cviky')
+                  ? 'text-primary-600 bg-primary-50'
+                  : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+              }`}
+            >
+              Katalog cviků
+            </Link>
           </div>
         </div>
       </div>
