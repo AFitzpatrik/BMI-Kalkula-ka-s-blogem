@@ -26,13 +26,13 @@ export default function ShouldersPage() {
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na ramena</h1>
             <p className="text-xl text-gray-600">
-              Zde budou tréninky a cviky zaměřené na posílení a rozvoj ramenních svalů.
+              Ramena stabilizují horní část těla a chrání klouby při tlacích i tazích.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Tato sekce je zatím v přípravě.</p>
-            <p className="text-gray-500 mt-4">Brzy sem přidáme detailní tréninky a cviky.</p>
+            <p className="text-gray-600 text-lg">Krátké, kontrolované série zlepší stabilitu i postoj.</p>
+            <p className="text-gray-500 mt-4">Nezapomeň na zadní delty a rotátory.</p>
           </div>
         </div>
 

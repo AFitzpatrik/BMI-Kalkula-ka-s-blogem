@@ -2,11 +2,11 @@ import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
 
 export const metadata = {
-  title: 'Tréninky na prsa | BMI Kalkulačka',
-  description: 'Cviky a tréninky zaměřené na posílení prsních svalů.',
+  title: 'Tréninky na hamstringy | BMI Kalkulačka',
+  description: 'Cviky a tréninky zaměřené na hamstringy.',
 }
 
-export default function ChestPage() {
+export default function HamstringyPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="flex gap-8 max-w-7xl mx-auto">
@@ -24,15 +24,15 @@ export default function ChestPage() {
           </div>
 
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na prsa</h1>
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na hamstringy</h1>
             <p className="text-xl text-gray-600">
-              Silná prsa zlepšují držení těla a podporují sílu při tlacích i stabilitu ramen.
+              Hamstringy chrání kolena a zlepšují výkon při běhu i skoku.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Zaměř se na tlačné cviky pro sílu i stabilitu ramen.</p>
-            <p className="text-gray-500 mt-4">Krátké, kontrolované série přinesou nejrychlejší progres.</p>
+            <p className="text-gray-600 text-lg">Zařaď hip hinge cviky pro sílu zadní strany stehen.</p>
+            <p className="text-gray-500 mt-4">Dbej na kontrolovaný návrat do výchozí pozice.</p>
           </div>
         </div>
 

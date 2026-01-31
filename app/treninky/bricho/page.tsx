@@ -26,13 +26,13 @@ export default function AbsPage() {
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na břicho</h1>
             <p className="text-xl text-gray-600">
-              Zde budou tréninky a cviky zaměřené na posílení břišních svalů a core stabilizaci.
+              Pevné core zlepšuje stabilitu, chrání záda a zlepšuje výkon v ostatních cvicích.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Tato sekce je zatím v přípravě.</p>
-            <p className="text-gray-500 mt-4">Brzy sem přidáme detailní tréninky a cviky.</p>
+            <p className="text-gray-600 text-lg">Stačí pár minut denně pro lepší držení těla.</p>
+            <p className="text-gray-500 mt-4">Kvalita pohybu je důležitější než počet opakování.</p>
           </div>
         </div>
 

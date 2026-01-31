@@ -2,11 +2,11 @@ import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
 
 export const metadata = {
-  title: 'Tréninky na prsa | BMI Kalkulačka',
-  description: 'Cviky a tréninky zaměřené na posílení prsních svalů.',
+  title: 'Tréninky na lýtka | BMI Kalkulačka',
+  description: 'Cviky a tréninky zaměřené na lýtka.',
 }
 
-export default function ChestPage() {
+export default function LytkaPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="flex gap-8 max-w-7xl mx-auto">
@@ -24,15 +24,15 @@ export default function ChestPage() {
           </div>
 
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na prsa</h1>
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na lýtka</h1>
             <p className="text-xl text-gray-600">
-              Silná prsa zlepšují držení těla a podporují sílu při tlacích i stabilitu ramen.
+              Lýtka stabilizují kotník a pomáhají při odrazu i běhu.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Zaměř se na tlačné cviky pro sílu i stabilitu ramen.</p>
-            <p className="text-gray-500 mt-4">Krátké, kontrolované série přinesou nejrychlejší progres.</p>
+            <p className="text-gray-600 text-lg">Krátké série s plným rozsahem přinesou výsledky.</p>
+            <p className="text-gray-500 mt-4">Zaměř se na pomalé spouštění paty.</p>
           </div>
         </div>
 

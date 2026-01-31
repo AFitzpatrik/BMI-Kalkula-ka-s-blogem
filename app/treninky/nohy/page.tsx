@@ -26,13 +26,13 @@ export default function LegsPage() {
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na nohy</h1>
             <p className="text-xl text-gray-600">
-              Zde budou tréninky a cviky zaměřené na posílení noh a hýždí.
+              Silné nohy zvyšují výkon, stabilitu a podporují efektivní spalování.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Tato sekce je zatím v přípravě.</p>
-            <p className="text-gray-500 mt-4">Brzy sem přidáme detailní tréninky a cviky.</p>
+            <p className="text-gray-600 text-lg">Dřepy a výpady pokryjí většinu potřeb.</p>
+            <p className="text-gray-500 mt-4">Dbej na rozsah pohybu a kontrolu.</p>
           </div>
         </div>
 

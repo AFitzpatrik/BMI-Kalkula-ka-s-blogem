@@ -2,11 +2,11 @@ import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
 
 export const metadata = {
-  title: 'Tréninky na prsa | BMI Kalkulačka',
-  description: 'Cviky a tréninky zaměřené na posílení prsních svalů.',
+  title: 'Cardio tréninky | BMI Kalkulačka',
+  description: 'Kardio tréninky pro kondici a spalování kalorií.',
 }
 
-export default function ChestPage() {
+export default function CardioPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="flex gap-8 max-w-7xl mx-auto">
@@ -24,15 +24,15 @@ export default function ChestPage() {
           </div>
 
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na prsa</h1>
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">Cardio</h1>
             <p className="text-xl text-gray-600">
-              Silná prsa zlepšují držení těla a podporují sílu při tlacích i stabilitu ramen.
+              Cardio podporuje kondici, zdraví srdce a celkovou výdrž.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Zaměř se na tlačné cviky pro sílu i stabilitu ramen.</p>
-            <p className="text-gray-500 mt-4">Krátké, kontrolované série přinesou nejrychlejší progres.</p>
+            <p className="text-gray-600 text-lg">Stačí 15–30 minut pro znatelný efekt.</p>
+            <p className="text-gray-500 mt-4">Střídej intenzitu pro lepší výsledky.</p>
           </div>
         </div>
 

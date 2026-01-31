@@ -26,13 +26,13 @@ export default function ArmsPage() {
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">Tréninky na ruce</h1>
             <p className="text-xl text-gray-600">
-              Zde budou tréninky a cviky zaměřené na biceps, triceps a celkovou sílu paží.
+              Biceps a triceps podporují sílu paží, úchop a výkon v tlacích i tazích.
             </p>
           </div>
 
           <div className="card text-center py-16">
-            <p className="text-gray-600 text-lg">Tato sekce je zatím v přípravě.</p>
-            <p className="text-gray-500 mt-4">Brzy sem přidáme detailní tréninky a cviky.</p>
+            <p className="text-gray-600 text-lg">Kombinuj tahy a tlaky pro vyvážený rozvoj paží.</p>
+            <p className="text-gray-500 mt-4">Střídej úchopy a tempo pro lepší stimul.</p>
           </div>
         </div>
 

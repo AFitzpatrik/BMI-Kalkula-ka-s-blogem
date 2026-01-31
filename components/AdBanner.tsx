@@ -47,10 +47,10 @@ export default function AdBanner({
         <div 
           className="bg-gray-200 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-600"
           style={{ 
-            minWidth: '320px', 
-            minHeight: '250px',
+            minWidth: '280px',
+            minHeight: '420px',
             width: '100%',
-            maxWidth: '300px'
+            maxWidth: '100%'
           }}
         >
           <div className="text-center p-4">
@@ -60,7 +60,7 @@ export default function AdBanner({
               Google AdSense reklama
             </p>
             <p className="text-xs text-gray-400 mt-2">
-              (320 x 250)
+              (280 x 420)
             </p>
           </div>
         </div>
