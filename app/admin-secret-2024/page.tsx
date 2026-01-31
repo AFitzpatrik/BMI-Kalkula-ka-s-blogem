@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BlogPost } from '@/lib/posts'
 import RichTextEditor from '@/components/RichTextEditor'
+import WorkoutManager from '@/components/WorkoutManager'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -17,6 +18,7 @@ export default function AdminPage() {
     author: '',
   })
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [activeTab, setActiveTab] = useState<'posts' | 'workouts'>('workouts')
 
   const handleLogout = async () => {
     try {
@@ -170,7 +172,7 @@ export default function AdminPage() {
           <div className="flex justify-between items-center mb-4">
             <div></div>
             <h1 className="text-5xl font-bold text-gray-900">
-              CMS - Správa článků
+              CMS - Správa obsahu
             </h1>
             <button
               onClick={handleLogout}
@@ -180,7 +182,7 @@ export default function AdminPage() {
             </button>
           </div>
           <p className="text-xl text-gray-600">
-            Přidávejte a spravujte články na blog
+            Přidávejte a spravujte články a tréninky
           </p>
         </div>
 
@@ -196,9 +198,40 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Formulář */}
-          <div className="card">
+        {/* Tab Navigation */}
+        <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('workouts')}
+            className={`px-4 py-2 font-semibold border-b-2 transition-colors ${
+              activeTab === 'workouts'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Tréninky
+          </button>
+          <button
+            onClick={() => setActiveTab('posts')}
+            className={`px-4 py-2 font-semibold border-b-2 transition-colors ${
+              activeTab === 'posts'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Články
+          </button>
+        </div>
+
+        {/* Workouts Tab */}
+        {activeTab === 'workouts' && (
+          <WorkoutManager />
+        )}
+
+        {/* Posts Tab */}
+        {activeTab === 'posts' && (
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Formulář */}
+            <div className="card">
             <h2 className="text-2xl font-bold mb-6 text-gray-900">
               {editingPost ? 'Upravit článek' : 'Nový článek'}
             </h2>
@@ -318,6 +351,7 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   )

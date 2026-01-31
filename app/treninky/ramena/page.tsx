@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na ramena | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function ShouldersPage() {
             <p className="text-gray-600 text-lg">Krátké, kontrolované série zlepší stabilitu i postoj.</p>
             <p className="text-gray-500 mt-4">Nezapomeň na zadní delty a rotátory.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="ramena" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">

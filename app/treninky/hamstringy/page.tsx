@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na hamstringy | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function HamstringyPage() {
             <p className="text-gray-600 text-lg">Zařaď hip hinge cviky pro sílu zadní strany stehen.</p>
             <p className="text-gray-500 mt-4">Dbej na kontrolovaný návrat do výchozí pozice.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="hamstringy" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na triceps | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function TricepsPage() {
             <p className="text-gray-600 text-lg">Krátké série s kontrolou zpevní lokty i paže.</p>
             <p className="text-gray-500 mt-4">Zařaď tlakové i izolované cviky.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="triceps" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">

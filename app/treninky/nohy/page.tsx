@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na nohy | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function LegsPage() {
             <p className="text-gray-600 text-lg">Dřepy a výpady pokryjí většinu potřeb.</p>
             <p className="text-gray-500 mt-4">Dbej na rozsah pohybu a kontrolu.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="nohy" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">

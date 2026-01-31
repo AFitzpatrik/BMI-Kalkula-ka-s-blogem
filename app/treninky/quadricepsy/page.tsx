@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na quadricepsy | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function QuadricepsyPage() {
             <p className="text-gray-600 text-lg">Postupně přidávej zátěž a drž techniku.</p>
             <p className="text-gray-500 mt-4">Kombinuj dřepy a výpady pro nejlepší efekt.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="quadricepsy" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">

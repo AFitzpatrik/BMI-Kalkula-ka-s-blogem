@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na břicho | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function AbsPage() {
             <p className="text-gray-600 text-lg">Stačí pár minut denně pro lepší držení těla.</p>
             <p className="text-gray-500 mt-4">Kvalita pohybu je důležitější než počet opakování.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="bricho" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">

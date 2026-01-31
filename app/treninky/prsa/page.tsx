@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import WorkoutDisplay from '@/components/WorkoutDisplay'
 
 export const metadata = {
   title: 'Tréninky na prsa | BMI Kalkulačka',
@@ -34,6 +35,8 @@ export default function ChestPage() {
             <p className="text-gray-600 text-lg">Zaměř se na tlačné cviky pro sílu i stabilitu ramen.</p>
             <p className="text-gray-500 mt-4">Krátké, kontrolované série přinesou nejrychlejší progres.</p>
           </div>
+
+          <WorkoutDisplay bodyPart="prsa" />
         </div>
 
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">
