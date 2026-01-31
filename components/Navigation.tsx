@@ -37,14 +37,14 @@ export default function Navigation() {
               Blog
             </Link>
             <Link
-              href="/cviky"
+              href="/treninky"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/cviky')
+                isActive('/treninky')
                   ? 'text-primary-600 bg-primary-50'
                   : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
               }`}
             >
-              Katalog cviků
+              Tréninky
             </Link>
           </div>
         </div>

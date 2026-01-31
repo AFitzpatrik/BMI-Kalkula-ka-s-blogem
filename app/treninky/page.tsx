@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdBanner from '@/components/AdBanner'
+import BodyMap from '@/components/BodyMap'
 
 export const metadata = {
   title: 'Katalog cviků | BMI Kalkulačka',
@@ -17,25 +18,25 @@ const categories: ExerciseCategory[] = [
   {
     title: 'Horní část těla',
     description: 'Ramena, prsa, záda a paže. Síla i mobilita.',
-    href: '/cviky#horni-cast-tela',
+    href: '/treninky#horni-cast-tela',
     items: ['Kliky', 'Přítahy v předklonu', 'Tlaky na ramena', 'Bicepsové zdvihy'],
   },
   {
     title: 'Střed těla',
     description: 'Core a stabilizace páteře pro lepší držení těla.',
-    href: '/cviky#stred-tela',
+    href: '/treninky#stred-tela',
     items: ['Plank', 'Zkracovačky', 'Bird-dog', 'Dead bug'],
   },
   {
     title: 'Dolní část těla',
     description: 'Nohy a hýždě pro sílu, výkon i prevenci zranění.',
-    href: '/cviky#dolni-cast-tela',
+    href: '/treninky#dolni-cast-tela',
     items: ['Dřepy', 'Výpady', 'Rumunský mrtvý tah', 'Hip thrust'],
   },
   {
     title: 'Kardio a kondice',
     description: 'Spalování kalorií a zlepšení vytrvalosti.',
-    href: '/cviky#kardio',
+    href: '/treninky#kardio',
     items: ['Burpees', 'Skákání přes švihadlo', 'Běh na místě', 'Mountain climbers'],
   },
 ]
@@ -61,7 +62,9 @@ export default function ExerciseCatalogPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <BodyMap />
+
+          <div className="grid gap-6 md:grid-cols-2 mt-12">
             {categories.map((category) => (
               <section key={category.title} className="card">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
