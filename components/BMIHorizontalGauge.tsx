@@ -82,8 +82,32 @@ export default function BMIHorizontalGauge({ bmi }: BMIHorizontalGaugeProps) {
           </div>
         </div>
 
-        {/* Popisky - rozprostřeny pod jejich sekcemi */}
-        <div className="relative w-full h-12">
+        {/* Popisky - mobilní verze */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-semibold sm:hidden">
+          <div className="text-blue-700">
+            <div className="text-blue-600">&lt;18,5</div>
+            <div className="font-medium">Podváha</div>
+          </div>
+          <div className="text-green-700">
+            <div className="text-green-600">18,5-24,9</div>
+            <div className="font-medium">Normální váha</div>
+          </div>
+          <div className="text-orange-700">
+            <div className="text-orange-600">25-29,9</div>
+            <div className="font-medium">Nadváha</div>
+          </div>
+          <div className="text-red-600">
+            <div className="text-red-500">30+</div>
+            <div className="font-medium">Obezita</div>
+          </div>
+          <div className="text-red-800 col-span-2 text-center">
+            <div className="text-red-700">35+</div>
+            <div className="font-medium">Obezita 2 st.</div>
+          </div>
+        </div>
+
+        {/* Popisky - rozprostřeny pod jejich sekcemi (desktop) */}
+        <div className="relative w-full h-12 hidden sm:block">
           {/* PODVÁHA - pod čárou vlevo - maximálně doleva */}
           <div className="absolute left-0 transform -translate-x-4 text-center text-xs font-semibold whitespace-nowrap">
             <div className="text-blue-600 text-xs">&lt;18,5</div>
