@@ -7,20 +7,20 @@ export default function AuthorCarousel() {
 
   const images = [
     {
-      src: '/author-1.jpg',
-      alt: 'Kickbox trénink'
-    },
-    {
-      src: '/author-2.jpg',
+      src: '/author-1.JPG',
       alt: 'Portrét'
     },
     {
+      src: '/author-2.jpg',
+      alt: 'Pullup'
+    },
+    {
       src: '/author-3.jpg',
-      alt: 'Trénink na síti'
+      alt: 'Gym'
     },
     {
       src: '/author-4.jpg',
-      alt: 'Běh'
+      alt: 'Kickbox'
     }
   ]
 
