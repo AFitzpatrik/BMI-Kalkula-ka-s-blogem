@@ -83,26 +83,28 @@ export default function BMIHorizontalGauge({ bmi }: BMIHorizontalGaugeProps) {
         </div>
 
         {/* Popisky - mobilní verze */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-semibold sm:hidden">
-          <div className="text-blue-700">
+        <div className="grid grid-cols-5 gap-x-4 -mx-2 px-2 text-[10px] leading-tight font-semibold sm:hidden">
+          <div className="text-blue-700 text-left">
             <div className="text-blue-600">&lt;18,5</div>
             <div className="font-medium">Podváha</div>
           </div>
-          <div className="text-green-700">
+          <div className="text-green-700 text-center">
             <div className="text-green-600">18,5-24,9</div>
-            <div className="font-medium">Normální váha</div>
+            <div className="font-medium">Normální</div>
+            <div className="font-medium">váha</div>
           </div>
-          <div className="text-orange-700">
+          <div className="text-orange-700 text-center">
             <div className="text-orange-600">25-29,9</div>
             <div className="font-medium">Nadváha</div>
           </div>
-          <div className="text-red-600">
+          <div className="text-red-600 text-center">
             <div className="text-red-500">30+</div>
             <div className="font-medium">Obezita</div>
           </div>
-          <div className="text-red-800 col-span-2 text-center">
+          <div className="text-red-800 text-right">
             <div className="text-red-700">35+</div>
-            <div className="font-medium">Obezita 2 st.</div>
+            <div className="font-medium">Obezita</div>
+            <div className="font-medium">2 st.</div>
           </div>
         </div>
 
