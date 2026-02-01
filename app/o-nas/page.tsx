@@ -1,4 +1,5 @@
 import AdBanner from '@/components/AdBanner'
+import AuthorCarousel from '@/components/AuthorCarousel'
 
 export default function AboutPage() {
   return (
@@ -39,9 +40,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">O autorovi</h2>
             <div className="flex flex-col sm:flex-row gap-8 items-start">
               <div className="flex flex-col items-start gap-4 flex-shrink-0">
-                <div className="w-56 h-[380px] rounded-lg bg-gradient-to-br from-blue-200 to-purple-200 flex items-center justify-center text-xl font-bold text-gray-700 shadow-md">
-                  Foto
-                </div>
+                <AuthorCarousel />
                 <div className="flex gap-2 w-full">
                   <a
                     href="#"
