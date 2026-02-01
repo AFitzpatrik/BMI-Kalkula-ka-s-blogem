@@ -40,7 +40,7 @@ export default function RootLayout({
         </main>
         <footer className="bg-gray-900 text-white py-8 mt-16">
           <div className="container mx-auto px-4 text-center">
-            <p>&copy; 2024 FitMateo. Všechna práva vyhrazena.</p>
+            <p>&copy; 2026 FitMateo. Všechna práva vyhrazena.</p>
           </div>
         </footer>
       </body>
