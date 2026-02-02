@@ -40,8 +40,9 @@ export default function AdBanner({
     }
   }, [])
 
-  // Zobrazit placeholder banner pro testování
-  if (showPlaceholder || adClientId.includes('XXXXXXXXXXXXXXXX')) {
+  // Zobrazit placeholder banner jen v dev módu
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  if ((showPlaceholder || adClientId.includes('XXXXXXXXXXXXXXXX')) && isDevelopment) {
     return (
       <div className="my-8 flex justify-center">
         <div 
@@ -66,6 +67,11 @@ export default function AdBanner({
         </div>
       </div>
     )
+  }
+
+  // Na produkci nerenduj nic, pokud není skutečná reklama
+  if (showPlaceholder || adClientId.includes('XXXXXXXXXXXXXXXX')) {
+    return null
   }
 
   // Skutečný AdSense banner
