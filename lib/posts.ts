@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import { Pool } from 'pg'
 
 export interface BlogPost {
   id: string
@@ -13,77 +12,108 @@ export interface BlogPost {
   slug: string
 }
 
-const postsDirectory = path.join(process.cwd(), 'data')
-const postsFile = path.join(postsDirectory, 'posts.json')
+const postsDirectory = path.join(process.cwd(), 'posts')
 
-// PostgreSQL pool - pro produkci
-let pgPool: Pool | null = null
-
-function getPGPool(): Pool | null {
-  if (pgPool) return pgPool
-  
-  // Jen pokud je dostupná DATABASE_URL (Neon PostgreSQL)
-  if (process.env.DATABASE_URL && process.env.NODE_ENV === 'production') {
-    try {
-      pgPool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false },
-      })
-      console.log('✅ Using Neon PostgreSQL for storage')
-      return pgPool
-    } catch (error) {
-      console.error('PostgreSQL connection failed:', error)
-    }
-  }
-  return null
-}
-
-// Inicializovat databázovou tabulku
-async function initDB() {
-  const pool = getPGPool()
-  if (!pool) return
-  
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS blog_posts (
-        id VARCHAR(255) PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        content TEXT NOT NULL,
-        excerpt TEXT NOT NULL,
-        author VARCHAR(255) NOT NULL,
-        slug VARCHAR(255) UNIQUE NOT NULL,
-        created_at TIMESTAMP NOT NULL,
-        updated_at TIMESTAMP NOT NULL
-      )
-    `)
-    console.log('✅ Database initialized')
-  } catch (error) {
-    console.error('Database init error:', error)
-  }
-}
-
-// Filesystem - pro dev a fallback
 function ensureDirectoryExists() {
   try {
     if (!fs.existsSync(postsDirectory)) {
       fs.mkdirSync(postsDirectory, { recursive: true })
-    }
-    if (!fs.existsSync(postsFile)) {
-      fs.writeFileSync(postsFile, JSON.stringify([], null, 2), 'utf-8')
     }
   } catch (error) {
     console.error('Error ensuring directory exists:', error)
   }
 }
 
-// Čtení z filesystem
+function parseFrontmatter(fileContent: string): { data: Record<string, string>; content: string } {
+  const fmRegex = /^---\s*[\r\n]+([\s\S]*?)\r?\n---\s*[\r\n]*/
+  const match = fileContent.match(fmRegex)
+
+  if (!match) {
+    return { data: {}, content: fileContent.trim() }
+  }
+
+  const raw = match[1]
+  const data: Record<string, string> = {}
+
+  raw.split(/\r?\n/).forEach((line) => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+    const separatorIndex = trimmed.indexOf(':')
+    if (separatorIndex === -1) return
+    const key = trimmed.slice(0, separatorIndex).trim()
+    const value = trimmed.slice(separatorIndex + 1).trim()
+    data[key] = normalizeFrontmatterValue(value)
+  })
+
+  const content = fileContent.slice(match[0].length).trim()
+  return { data, content }
+}
+
+function normalizeFrontmatterValue(value: string): string {
+  const trimmed = value.trim()
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    try {
+      return JSON.parse(trimmed)
+    } catch {
+      return trimmed.slice(1, -1)
+    }
+  }
+  return trimmed
+}
+
+function stringifyFrontmatter(data: Record<string, string>, content: string): string {
+  const lines = Object.entries(data).map(([key, value]) => {
+    const safeValue = typeof value === 'string' ? value.replace(/\r?\n/g, ' ').trim() : String(value)
+    return `${key}: ${JSON.stringify(safeValue)}`
+  })
+  return `---\n${lines.join('\n')}\n---\n\n${content.trim()}\n`
+}
+
+function getMarkdownFilePath(slug: string) {
+  return path.join(postsDirectory, `${slug}.md`)
+}
+
+function buildPostFromFile(filePath: string): BlogPost | null {
+  try {
+    const fileContent = fs.readFileSync(filePath, 'utf-8')
+    const { data, content } = parseFrontmatter(fileContent)
+    const stats = fs.statSync(filePath)
+    const slug = path.basename(filePath, '.md')
+
+    const createdAt = data.createdAt || data.created_at || stats.birthtime.toISOString()
+    const updatedAt = data.updatedAt || data.updated_at || stats.mtime.toISOString()
+    const excerpt = data.excerpt || content.split(/\r?\n/).find((line) => line.trim())?.slice(0, 180) || ''
+
+    return {
+      id: data.id || slug,
+      title: data.title || slug,
+      content,
+      excerpt,
+      author: data.author || 'Neznámý autor',
+      slug,
+      createdAt,
+      updatedAt,
+    }
+  } catch (error) {
+    console.error('Error parsing markdown file:', filePath, error)
+    return null
+  }
+}
+
 function readFromFS(): BlogPost[] {
   try {
     ensureDirectoryExists()
-    const fileContents = fs.readFileSync(postsFile, 'utf-8')
-    const posts: BlogPost[] = JSON.parse(fileContents || '[]')
-    return posts.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    const files = fs.readdirSync(postsDirectory)
+    const posts = files
+      .filter((file) => file.endsWith('.md'))
+      .map((file) => buildPostFromFile(path.join(postsDirectory, file)))
+      .filter((post): post is BlogPost => Boolean(post))
+
+    return posts.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
   } catch (error) {
     console.error('Error reading from filesystem:', error)
@@ -91,61 +121,18 @@ function readFromFS(): BlogPost[] {
   }
 }
 
-// Psaní do filesystem
-function writeToFS(posts: BlogPost[]) {
-  try {
-    ensureDirectoryExists()
-    fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2), 'utf-8')
-  } catch (error) {
-    console.error('Error writing to filesystem:', error)
-    throw error
-  }
-}
-
-// Čtení z PostgreSQL
-async function readFromDB(): Promise<BlogPost[]> {
-  const pool = getPGPool()
-  if (!pool) return []
-  
-  try {
-    const result = await pool.query(
-      'SELECT * FROM blog_posts ORDER BY created_at DESC'
-    )
-    return result.rows.map(row => ({
-      id: row.id,
-      title: row.title,
-      content: row.content,
-      excerpt: row.excerpt,
-      author: row.author,
-      slug: row.slug,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    }))
-  } catch (error) {
-    console.error('Database read error:', error)
-    return []
-  }
-}
-
 export async function getAllPosts(): Promise<BlogPost[]> {
-  const pool = getPGPool()
-  
-  if (pool) {
-    try {
-      await initDB()
-      return await readFromDB()
-    } catch (error) {
-      console.error('❌ Database error:', error)
-      return readFromFS()
-    }
-  }
-  
-  // Dev mode - use filesystem
   return readFromFS()
 }
 export function getPostBySlug(slug: string): BlogPost | null {
-  const posts = readFromFS()
-  return posts.find(post => post.slug === slug) || null
+  try {
+    const filePath = getMarkdownFilePath(slug)
+    if (!fs.existsSync(filePath)) return null
+    return buildPostFromFile(filePath)
+  } catch (error) {
+    console.error('Error reading post by slug:', error)
+    return null
+  }
 }
 
 export async function getPostBySlugAsync(slug: string): Promise<BlogPost | null> {
@@ -155,7 +142,6 @@ export async function getPostBySlugAsync(slug: string): Promise<BlogPost | null>
 
 export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): Promise<BlogPost> {
   try {
-    const pool = getPGPool()
     const allPosts = await getAllPosts()
     
     const slug = post.title
@@ -179,18 +165,21 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
       updatedAt: new Date().toISOString(),
     }
 
-    if (pool) {
-      await initDB()
-      await pool.query(
-        'INSERT INTO blog_posts (id, title, content, excerpt, author, slug, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-        [newPost.id, newPost.title, newPost.content, newPost.excerpt, newPost.author, newPost.slug, newPost.createdAt, newPost.updatedAt]
-      )
-      console.log('✅ Post created in PostgreSQL:', newPost.id, newPost.title)
-    } else {
-      const posts = [...allPosts, newPost]
-      writeToFS(posts)
-      console.log('✅ Post created in FS:', newPost.id, newPost.title)
-    }
+    ensureDirectoryExists()
+    const filePath = getMarkdownFilePath(newPost.slug)
+    const fileContent = stringifyFrontmatter(
+      {
+        id: newPost.id,
+        title: newPost.title,
+        excerpt: newPost.excerpt,
+        author: newPost.author,
+        createdAt: newPost.createdAt,
+        updatedAt: newPost.updatedAt,
+      },
+      newPost.content
+    )
+    fs.writeFileSync(filePath, fileContent, 'utf-8')
+    console.log('✅ Post created in FS (markdown):', newPost.id, newPost.title)
     
     return newPost
   } catch (error) {
@@ -201,7 +190,6 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
 
 export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
   try {
-    const pool = getPGPool()
     const allPosts = await getAllPosts()
     const index = allPosts.findIndex(p => p.id === id)
     
@@ -213,19 +201,21 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
       updatedAt: new Date().toISOString(),
     }
 
-    if (pool) {
-      await initDB()
-      await pool.query(
-        'UPDATE blog_posts SET title=$1, content=$2, excerpt=$3, author=$4, updated_at=$5 WHERE id=$6',
-        [updatedPost.title, updatedPost.content, updatedPost.excerpt, updatedPost.author, updatedPost.updatedAt, id]
-      )
-      console.log('✅ Post updated in PostgreSQL:', id)
-    } else {
-      const posts = [...allPosts]
-      posts[index] = updatedPost
-      writeToFS(posts)
-      console.log('✅ Post updated in FS:', id)
-    }
+    ensureDirectoryExists()
+    const filePath = getMarkdownFilePath(updatedPost.slug)
+    const fileContent = stringifyFrontmatter(
+      {
+        id: updatedPost.id,
+        title: updatedPost.title,
+        excerpt: updatedPost.excerpt,
+        author: updatedPost.author,
+        createdAt: updatedPost.createdAt,
+        updatedAt: updatedPost.updatedAt,
+      },
+      updatedPost.content
+    )
+    fs.writeFileSync(filePath, fileContent, 'utf-8')
+    console.log('✅ Post updated in FS (markdown):', id)
     
     return updatedPost
   } catch (error) {
@@ -236,20 +226,16 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
 
 export async function deletePost(id: string): Promise<boolean> {
   try {
-    const pool = getPGPool()
     const allPosts = await getAllPosts()
-    const filteredPosts = allPosts.filter(p => p.id !== id)
+    const postToDelete = allPosts.find(p => p.id === id)
     
-    if (filteredPosts.length === allPosts.length) return false
+    if (!postToDelete) return false
 
-    if (pool) {
-      await initDB()
-      await pool.query('DELETE FROM blog_posts WHERE id=$1', [id])
-      console.log('✅ Post deleted from PostgreSQL:', id)
-    } else {
-      writeToFS(filteredPosts)
-      console.log('✅ Post deleted from FS:', id)
+    const filePath = getMarkdownFilePath(postToDelete.slug)
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
     }
+    console.log('✅ Post deleted from FS (markdown):', id)
     
     return true
   } catch (error) {
