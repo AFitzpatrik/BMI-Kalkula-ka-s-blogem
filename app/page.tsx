@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import BMICalculator from '@/components/BMICalculator'
 import AdBanner from '@/components/AdBanner'
+import StructuredData from '@/components/StructuredData'
 
 export default function Home() {
   return (
-    <div className="container mx-auto px-4 py-8 sm:py-12">
+    <>
+      <StructuredData />
+      <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="flex gap-4 lg:gap-8 max-w-7xl mx-auto">
         {/* Levý sidebar s reklamou */}
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">
@@ -19,10 +22,13 @@ export default function Home() {
         <div className="flex-1 w-full max-w-4xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
-              BMI Kalkulačka
+              BMI Kalkulačka Online Zdarma
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 px-4">
+            <p className="text-lg sm:text-xl text-gray-600 px-4 mb-4">
               Vypočítejte si svůj Body Mass Index jednoduše a rychle
+            </p>
+            <p className="text-sm sm:text-base text-gray-500 px-4">
+              ✓ Přesný výpočet BMI | ✓ Podrobné vysvětlení | ✓ Graf a tabulka | ✓ Zcela zdarma
             </p>
           </div>
 
@@ -128,7 +134,9 @@ export default function Home() {
             </h2>
             <div className="relative w-full h-96 bg-gradient-to-br from-blue-100 via-green-100 via-yellow-100 via-orange-100 to-red-100 rounded-lg overflow-hidden">
               {/* SVG Graf */}
-              <svg viewBox="0 0 800 400" className="w-full h-full">
+              <svg viewBox="0 0 800 400" className="w-full h-full" role="img" aria-label="Graf BMI podle výšky a hmotnosti">
+                <title>Graf BMI podle výšky a hmotnosti</title>
+                <desc>Graf znázorňující vztah mezi výškou (150-210 cm) a hmotností (40-130 kg) pro jednotlivé BMI kategorie: podváha, optimální váha, nadváha a obezita.</desc>
                 {/* Oblasti */}
                 <defs>
                   <linearGradient id="underweight" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -419,6 +427,50 @@ export default function Home() {
               </p>
             </div>
           </div>
+
+          {/* CTA sekce */}
+          <div className="mt-12 bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl p-8 text-center text-white shadow-xl">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              Chcete vědět více o zdravém životním stylu?
+            </h2>
+            <p className="text-lg mb-6 text-primary-100">
+              Přečtěte si naše články o výživě, cvičení a zdraví
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/blog"
+                className="inline-block bg-white text-primary-600 font-semibold px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors shadow-md"
+              >
+                Přejít na blog
+              </a>
+              <a
+                href="/treninky"
+                className="inline-block bg-primary-800 text-white font-semibold px-8 py-3 rounded-lg hover:bg-primary-900 transition-colors shadow-md"
+              >
+                Zobrazit tréninky
+              </a>
+            </div>
+          </div>
+
+          {/* SEO text na konci stránky */}
+          <div className="mt-12 prose prose-gray max-w-none">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Proč používat BMI kalkulačku?
+            </h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              <strong>BMI kalkulačka</strong> je nejjednodušší způsob, jak zjistit, zda je vaše tělesná hmotnost v&nbsp;ideálním rozmezí. 
+              Náš <strong>online BMI kalkulátor</strong> vám během několika sekund řekne, zda máte podváhu, optimální váhu, nadváhu nebo obezitu.
+            </p>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              <strong>Výpočet BMI</strong> je založen na vědecky ověřeném vzorci, který používají lékaři po celém světě. 
+              Kromě základního výpočtu vám naše kalkulačka nabízí také podrobné vysvětlení všech <strong>BMI hodnot</strong>, 
+              přehlednou <strong>BMI tabulku</strong> a názorný <strong>BMI graf</strong>.
+            </p>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              Naše <strong>BMI kalkulačka online</strong> je zcela zdarma, funguje bez registrace a je optimalizována pro všechna zařízení 
+              včetně mobilních telefonů. Zjistěte si svou <strong>ideální váhu</strong> ještě dnes!
+            </p>
+          </div>
         </div>
 
         {/* Pravý sidebar s reklamou */}
@@ -429,5 +481,6 @@ export default function Home() {
         </aside>
       </div>
     </div>
+    </>
   )
 }

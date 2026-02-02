@@ -14,8 +14,8 @@ export default function AboutPage() {
 
         {/* Hlavní obsah */}
         <div className="flex-1 max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">O projektu</h1>
-          <p className="text-gray-700 leading-relaxed mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">O nás</h1>
+          <p className="text-lg text-gray-700 leading-relaxed mb-4">
             FitMateo je osobní projekt zaměřený na jednoduché a srozumitelné nástroje
             pro zdravější životní styl. Cílem je nabídnout přehlednou BMI kalkulačku,
             praktické informace a motivaci k lepším návykům.

@@ -14,7 +14,7 @@ export default function Navigation() {
     { href: '/', label: 'BMI Kalkulačka' },
     { href: '/blog', label: 'Blog' },
     { href: '/treninky', label: 'Tréninky' },
-    { href: '/o-nas', label: 'O projektu' },
+    { href: '/o-nas', label: 'O nás' },
   ]
 
   return (
