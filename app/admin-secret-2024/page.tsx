@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BlogPost } from '@/lib/posts'
 import RichTextEditor from '@/components/RichTextEditor'
+import MarkdownRenderer from '@/components/MarkdownRenderer'
 import WorkoutManager from '@/components/WorkoutManager'
 
 export default function AdminPage() {
@@ -17,6 +18,8 @@ export default function AdminPage() {
     excerpt: '',
     author: '',
   })
+  const [showPreview, setShowPreview] = useState(true)
+  const [editorOnly, setEditorOnly] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [activeTab, setActiveTab] = useState<'posts' | 'workouts'>('workouts')
 
@@ -127,6 +130,7 @@ export default function AdminPage() {
 
   const handleEdit = (post: BlogPost) => {
     setEditingPost(post)
+    setEditorOnly(true)
     setFormData({
       title: post.title,
       content: post.content,
@@ -229,12 +233,40 @@ export default function AdminPage() {
 
         {/* Posts Tab */}
         {activeTab === 'posts' && (
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className={editorOnly ? '' : 'grid md:grid-cols-2 gap-8'}>
             {/* Formulář */}
             <div className="card">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">
-              {editingPost ? 'Upravit článek' : 'Nový článek'}
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {editingPost ? 'Upravit článek' : 'Nový článek'}
+              </h2>
+              {!editorOnly && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetForm()
+                    setEditorOnly(true)
+                  }}
+                  className="text-sm font-semibold px-3 py-1.5 rounded-md border-2 border-primary-600 text-primary-700 hover:bg-primary-50"
+                >
+                  Nový článek na celou stránku
+                </button>
+              )}
+            </div>
+            {editorOnly && (
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-gray-500">
+                  Režim celé stránky
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setEditorOnly(false)}
+                  className="text-sm font-semibold px-3 py-1.5 rounded-md border-2 border-primary-600 text-primary-700 hover:bg-primary-50"
+                >
+                  Zobrazit seznam článků
+                </button>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -289,9 +321,28 @@ export default function AdminPage() {
                     placeholder="Začněte psát článek... Použijte tlačítka pro formátování nebo markdown syntax."
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Tip: Použijte tlačítka pro formátování nebo markdown syntax (**, *, #, -, &gt;, `, [text](url), ![alt](url))
-                </p>
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-gray-500">
+                    Tip: Použijte tlačítka pro formátování nebo markdown syntax (**, *, #, -, &gt;, `, [text](url), ![alt](url))
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="text-xs text-primary-600 hover:text-primary-700 font-semibold"
+                  >
+                    {showPreview ? 'Skrýt náhled' : 'Zobrazit náhled'}
+                  </button>
+                </div>
+                {showPreview && (
+                  <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-white">
+                    <p className="text-xs text-gray-500 mb-2">Náhled článku</p>
+                    {formData.content.trim() ? (
+                      <MarkdownRenderer content={formData.content} />
+                    ) : (
+                      <p className="text-sm text-gray-500">Začněte psát, náhled se objeví zde.</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4">
@@ -312,44 +363,48 @@ export default function AdminPage() {
           </div>
 
           {/* Seznam článků */}
-          <div className="card">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">
-              Seznam článků ({posts.length})
-            </h2>
-            {loading ? (
-              <p className="text-gray-600">Načítání...</p>
-            ) : posts.length === 0 ? (
-              <p className="text-gray-600">Zatím nejsou žádné články.</p>
-            ) : (
-              <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                {posts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-2">{post.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(post)}
-                        className="text-sm btn-secondary py-1 px-3"
-                      >
-                        Upravit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(post.id)}
-                        className="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg transition-colors"
-                      >
-                        Smazat
-                      </button>
-                    </div>
-                  </div>
-                ))}
+          {!editorOnly && (
+            <div className="card">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Seznam článků ({posts.length})
+                </h2>
               </div>
-            )}
-          </div>
+              {loading ? (
+                <p className="text-gray-600">Načítání...</p>
+              ) : posts.length === 0 ? (
+                <p className="text-gray-600">Zatím nejsou žádné články.</p>
+              ) : (
+                <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                  {posts.map((post) => (
+                    <div
+                      key={post.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                    >
+                      <h3 className="font-semibold text-gray-900 mb-2">{post.title}</h3>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(post)}
+                          className="text-sm btn-secondary py-1 px-3"
+                        >
+                          Upravit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(post.id)}
+                          className="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg transition-colors"
+                        >
+                          Smazat
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
         )}
       </div>

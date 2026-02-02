@@ -14,6 +14,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [showImageDialog, setShowImageDialog] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [imageAlt, setImageAlt] = useState('')
+  const [imageWidth, setImageWidth] = useState('')
+  const [imageWidthUnit, setImageWidthUnit] = useState<'px' | '%'>('px')
   const [uploading, setUploading] = useState(false)
 
   const insertText = (before: string, after: string = '') => {
@@ -37,12 +39,16 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
   const insertImage = () => {
     if (!imageUrl.trim()) return
-    
-    const imgTag = `\n\n![${imageAlt || 'Obrázek'}](${imageUrl})\n\n`
+
+    const widthValue = imageWidth.trim()
+    const widthPart = widthValue ? `{width=${widthValue}${imageWidthUnit}}` : ''
+    const imgTag = `\n\n![${imageAlt || 'Obrázek'}](${imageUrl})${widthPart}\n\n`
     insertText(imgTag)
     setShowImageDialog(false)
     setImageUrl('')
     setImageAlt('')
+    setImageWidth('')
+    setImageWidthUnit('px')
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -261,6 +267,74 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                   placeholder="Popis obrázku"
                   className="input-field"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Šířka obrázku (volitelné)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={imageWidth}
+                    onChange={(e) => setImageWidth(e.target.value)}
+                    placeholder={imageWidthUnit === 'px' ? 'např. 600' : 'např. 60'}
+                    className="input-field"
+                    min="1"
+                  />
+                  <select
+                    value={imageWidthUnit}
+                    onChange={(e) => setImageWidthUnit(e.target.value as 'px' | '%')}
+                    className="input-field w-24"
+                  >
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                  </select>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageWidth('25')
+                      setImageWidthUnit('%')
+                    }}
+                    className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+                  >
+                    25%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageWidth('50')
+                      setImageWidthUnit('%')
+                    }}
+                    className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+                  >
+                    50%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageWidth('75')
+                      setImageWidthUnit('%')
+                    }}
+                    className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+                  >
+                    75%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageWidth('100')
+                      setImageWidthUnit('%')
+                    }}
+                    className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+                  >
+                    100%
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Příklad: 600px nebo 60%. Bez vyplnění se použije plná šířka.
+                </p>
               </div>
               <div className="flex gap-3">
                 <button

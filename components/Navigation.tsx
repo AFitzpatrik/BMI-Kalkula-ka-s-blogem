@@ -7,6 +7,7 @@ import { useState } from 'react'
 export default function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const showAdmin = process.env.NODE_ENV === 'development'
 
   const isActive = (path: string) => pathname === path
 
@@ -16,6 +17,9 @@ export default function Navigation() {
     { href: '/treninky', label: 'Tréninky' },
     { href: '/o-nas', label: 'O nás' },
   ]
+  const links = showAdmin
+    ? [...navLinks, { href: '/admin-secret-2024', label: 'ADMIN' }]
+    : navLinks
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -27,14 +31,16 @@ export default function Navigation() {
           
           {/* Desktop menu */}
           <div className="hidden md:flex space-x-4 lg:space-x-6">
-            {navLinks.map((link) => (
+            {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(link.href)
-                    ? 'text-primary-600 bg-primary-50'
-                    : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                  link.label === 'ADMIN'
+                    ? 'text-red-600 font-bold hover:text-red-700 hover:bg-red-50'
+                    : isActive(link.href)
+                      ? 'text-primary-600 bg-primary-50'
+                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
                 }`}
               >
                 {link.label}
@@ -69,15 +75,17 @@ export default function Navigation() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
-            {navLinks.map((link) => (
+            {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive(link.href)
-                    ? 'text-primary-600 bg-primary-50'
-                    : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                  link.label === 'ADMIN'
+                    ? 'text-red-600 font-bold hover:text-red-700 hover:bg-red-50'
+                    : isActive(link.href)
+                      ? 'text-primary-600 bg-primary-50'
+                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
                 }`}
               >
                 {link.label}

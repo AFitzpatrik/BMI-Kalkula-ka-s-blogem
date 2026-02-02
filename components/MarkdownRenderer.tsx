@@ -22,8 +22,9 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     // Blockquotes
     html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-primary-300 pl-4 py-2 my-4 bg-gray-50 italic text-gray-700">$1</blockquote>')
 
-    // Images
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<div class="my-6"><img src="$2" alt="$1" class="w-full rounded-lg shadow-md" loading="lazy" /><p class="text-sm text-gray-500 text-center mt-2 italic">$1</p></div>')
+    // Images (optional width: ![alt](url){width=600px} or {width=60%})
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)\{width=([^}]+)\}/g, '<div class="my-6 flex flex-col items-center"><img src="$2" alt="$1" class="rounded-lg shadow-md" style="width: $3; max-width: 100%; height: auto;" loading="lazy" /><p class="text-sm text-gray-500 text-center mt-2 italic">$1</p></div>')
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<div class="my-6 flex flex-col items-center"><img src="$2" alt="$1" class="w-full max-w-3xl rounded-lg shadow-md" loading="lazy" /><p class="text-sm text-gray-500 text-center mt-2 italic">$1</p></div>')
 
     // Links
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary-600 hover:text-primary-700 underline" target="_blank" rel="noopener noreferrer">$1</a>')
