@@ -42,7 +42,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="flex gap-8 max-w-7xl mx-auto">
+      <div className="flex gap-10 max-w-[1400px] mx-auto">
         {/* Levý sidebar s reklamou */}
         <aside className="hidden md:block w-48 lg:w-64 flex-shrink-0">
           <div className="sticky top-24">

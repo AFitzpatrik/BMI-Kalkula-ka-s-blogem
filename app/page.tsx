@@ -10,7 +10,7 @@ export default function Home() {
     <>
       <StructuredData />
       <div className="container mx-auto px-4 py-8 sm:py-12">
-      <div className="flex gap-4 lg:gap-8 max-w-7xl mx-auto">
+      <div className="flex gap-4 lg:gap-10 max-w-[1400px] mx-auto">
         {/* Levý sidebar s reklamou */}
         <aside className="hidden lg:block w-48 xl:w-64 flex-shrink-0">
           <div className="sticky top-24">
@@ -19,7 +19,7 @@ export default function Home() {
         </aside>
 
         {/* Hlavní obsah */}
-        <div className="flex-1 w-full max-w-4xl mx-auto">
+        <div className="flex-1 w-full max-w-[1100px] mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
               BMI Kalkulačka Online Zdarma
@@ -34,7 +34,7 @@ export default function Home() {
 
           {/* Navigační tlačítka */}
           <div className="mb-8">
-            <div className="flex gap-3 justify-center flex-wrap max-w-3xl mx-auto">
+            <div className="flex gap-3 justify-center flex-wrap max-w-[1000px] mx-auto">
               <a 
                 href="#bmi-kalkulacka" 
                 className="px-4 py-2 sm:px-6 sm:py-3 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 text-sm sm:text-base text-gray-700 font-medium whitespace-nowrap hover:bg-blue-50 border border-gray-200"

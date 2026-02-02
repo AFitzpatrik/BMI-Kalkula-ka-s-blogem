@@ -4,7 +4,7 @@ import AuthorCarousel from '@/components/AuthorCarousel'
 export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="flex gap-8 max-w-7xl mx-auto">
+      <div className="flex gap-10 max-w-[1400px] mx-auto">
         {/* Levý sidebar s reklamou */}
         <aside className="hidden md:block w-48 lg:w-64 flex-shrink-0">
           <div className="sticky top-24">
@@ -13,7 +13,7 @@ export default function AboutPage() {
         </aside>
 
         {/* Hlavní obsah */}
-        <div className="flex-1 max-w-4xl mx-auto">
+        <div className="flex-1 max-w-[1100px] mx-auto">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">O nás</h1>
           <p className="text-lg text-gray-700 leading-relaxed mb-4">
             FitMateo je osobní projekt zaměřený na jednoduché a srozumitelné nástroje

@@ -10,7 +10,7 @@ export const metadata = {
 export default function ExerciseCatalogPage() {
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="flex gap-8 max-w-7xl mx-auto">
+      <div className="flex gap-10 max-w-[1400px] mx-auto">
         {/* Levý sidebar s reklamou */}
         <aside className="hidden md:block w-48 lg:w-64 flex-shrink-0">
           <div className="sticky top-24">
@@ -19,7 +19,7 @@ export default function ExerciseCatalogPage() {
         </aside>
 
         {/* Hlavní obsah */}
-        <div className="flex-1 max-w-4xl mx-auto">
+        <div className="flex-1 max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">Katalog tréninků</h1>
             <p className="text-xl text-gray-600">
