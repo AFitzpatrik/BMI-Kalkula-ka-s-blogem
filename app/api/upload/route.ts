@@ -55,8 +55,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: uploadResult.secure_url })
   } catch (error) {
     console.error('Upload error:', error)
+    const message = error instanceof Error ? error.message : 'Chyba při nahrávání souboru'
+    const httpCode = (error as { http_code?: number }).http_code
+    const cloudinaryError = (error as { error?: { message?: string; http_code?: number } }).error
     return NextResponse.json(
-      { error: 'Chyba při nahrávání souboru' },
+      {
+        error: 'Chyba při nahrávání souboru',
+        details: message,
+        httpCode: httpCode ?? null,
+        cloudinaryMessage: cloudinaryError?.message ?? null,
+        cloudinaryHttpCode: cloudinaryError?.http_code ?? null,
+      },
       { status: 500 }
     )
   }
