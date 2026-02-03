@@ -245,7 +245,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                   className="input-field"
                   autoFocus
                 />
-                {imageUrl && imageUrl.startsWith('/uploads/') && (
+                {imageUrl && (
                   <div className="mt-2">
                     <img 
                       src={imageUrl} 

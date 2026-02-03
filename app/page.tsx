@@ -192,7 +192,7 @@ export default function Home() {
                 <text x="85" y="55" textAnchor="end" fontSize="12" className="fill-gray-600">130</text>
 
                 {/* Popisky kategorií */}
-                <text x="580" y="230" fontSize="16" fontWeight="bold" className="fill-blue-600">PODVÁHA</text>
+                <text x="580" y="210" fontSize="16" fontWeight="bold" className="fill-blue-600">PODVÁHA</text>
                 <text x="420" y="155" fontSize="16" fontWeight="bold" className="fill-green-600">OPTIMÁLNÍ VÁHA</text>
                 <text x="300" y="120" fontSize="16" fontWeight="bold" className="fill-yellow-600">NADVÁHA</text>
                 <text x="200" y="80" fontSize="16" fontWeight="bold" className="fill-red-600">OBEZITA</text>

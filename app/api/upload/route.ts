@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { v2 as cloudinary } from 'cloudinary'
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return NextResponse.json(
+        { error: 'Chybí nastavení Cloudinary v prostředí' },
+        { status: 500 }
+      )
+    }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    })
+
     const formData = await request.formData()
     const file = formData.get('file') as File
 
@@ -33,26 +44,15 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+    const base64 = buffer.toString('base64')
+    const dataUri = `data:${file.type};base64,${base64}`
 
-    // Vytvořit adresář pro uploady, pokud neexistuje
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true })
-    }
+    const uploadResult = await cloudinary.uploader.upload(dataUri, {
+      folder: 'uploads',
+      resource_type: 'image',
+    })
 
-    // Generovat unikátní název souboru
-    const timestamp = Date.now()
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const filename = `${timestamp}-${originalName}`
-    const filepath = join(uploadsDir, filename)
-
-    // Uložit soubor
-    await writeFile(filepath, buffer)
-
-    // Vrátit URL obrázku
-    const imageUrl = `/uploads/${filename}`
-
-    return NextResponse.json({ url: imageUrl })
+    return NextResponse.json({ url: uploadResult.secure_url })
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json(
