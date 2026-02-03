@@ -16,6 +16,20 @@ export async function POST(request: NextRequest) {
       api_secret: process.env.CLOUDINARY_API_SECRET,
     })
 
+    try {
+      await cloudinary.api.ping()
+    } catch (authError) {
+      console.error('Cloudinary auth error:', authError)
+      const authMessage = authError instanceof Error ? authError.message : 'Chyba ověření Cloudinary'
+      return NextResponse.json(
+        {
+          error: 'Chyba ověření Cloudinary',
+          details: authMessage,
+        },
+        { status: 500 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
 
@@ -58,6 +72,10 @@ export async function POST(request: NextRequest) {
     const message = error instanceof Error ? error.message : 'Chyba při nahrávání souboru'
     const httpCode = (error as { http_code?: number }).http_code
     const cloudinaryError = (error as { error?: { message?: string; http_code?: number } }).error
+    const rawError =
+      typeof error === 'object'
+        ? JSON.stringify(error, Object.getOwnPropertyNames(error))
+        : String(error)
     return NextResponse.json(
       {
         error: 'Chyba při nahrávání souboru',
@@ -65,6 +83,7 @@ export async function POST(request: NextRequest) {
         httpCode: httpCode ?? null,
         cloudinaryMessage: cloudinaryError?.message ?? null,
         cloudinaryHttpCode: cloudinaryError?.http_code ?? null,
+        rawError,
       },
       { status: 500 }
     )
