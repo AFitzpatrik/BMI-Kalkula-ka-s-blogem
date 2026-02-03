@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { BlogPost } from '@/lib/posts'
 import RichTextEditor from '@/components/RichTextEditor'
@@ -17,11 +17,16 @@ export default function AdminPage() {
     content: '',
     excerpt: '',
     author: '',
+    coverImage: '',
+    coverAlt: '',
   })
   const [showPreview, setShowPreview] = useState(true)
   const [editorOnly, setEditorOnly] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [activeTab, setActiveTab] = useState<'posts' | 'workouts'>('workouts')
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const coverFileInputRef = useRef<HTMLInputElement>(null)
 
   const handleLogout = async () => {
     try {
@@ -74,6 +79,71 @@ export default function AdminPage() {
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text })
     setTimeout(() => setMessage(null), 5000)
+  }
+
+  const handleCoverFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      showMessage('error', 'Soubor musí být obrázek')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showMessage('error', 'Soubor je příliš velký (max 5MB)')
+      return
+    }
+
+    setCoverUploading(true)
+    const formDataUpload = new FormData()
+    formDataUpload.append('file', file)
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Chyba při nahrávání')
+      }
+
+      const data = await response.json()
+      setFormData((prev) => ({ ...prev, coverImage: data.url }))
+    } catch (error) {
+      showMessage('error', error instanceof Error ? error.message : 'Chyba při nahrávání obrázku')
+    } finally {
+      setCoverUploading(false)
+      if (coverFileInputRef.current) {
+        coverFileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleCoverDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }
+
+  const handleCoverDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    const files = e.dataTransfer.files
+    if (files && files[0]) {
+      const fakeEvent = {
+        target: { files },
+      } as unknown as React.ChangeEvent<HTMLInputElement>
+      handleCoverFileUpload(fakeEvent)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,6 +206,8 @@ export default function AdminPage() {
       content: post.content,
       excerpt: post.excerpt,
       author: post.author,
+      coverImage: post.coverImage || '',
+      coverAlt: post.coverAlt || '',
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -165,7 +237,7 @@ export default function AdminPage() {
   }
 
   const resetForm = () => {
-    setFormData({ title: '', content: '', excerpt: '', author: '' })
+    setFormData({ title: '', content: '', excerpt: '', author: '', coverImage: '', coverAlt: '' })
     setEditingPost(null)
   }
 
@@ -307,6 +379,74 @@ export default function AdminPage() {
                   className="input-field"
                   rows={3}
                   required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="coverImage" className="block text-sm font-medium text-gray-700 mb-2">
+                  Obrázek článku (URL nebo drag & drop)
+                </label>
+                <div
+                  onDragEnter={handleCoverDrag}
+                  onDragLeave={handleCoverDrag}
+                  onDragOver={handleCoverDrag}
+                  onDrop={handleCoverDrop}
+                  className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
+                    dragActive ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white'
+                  }`}
+                >
+                  <input
+                    ref={coverFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverFileUpload}
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <input
+                      id="coverImage"
+                      type="text"
+                      value={formData.coverImage}
+                      onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+                      className="input-field w-full"
+                      placeholder="/uploads/obrazek.jpg nebo https://..."
+                    />
+                    <div className="flex flex-wrap gap-2 w-full">
+                      <button
+                        type="button"
+                        onClick={() => coverFileInputRef.current?.click()}
+                        disabled={coverUploading}
+                        className="px-3 py-1.5 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm disabled:opacity-50 font-medium"
+                      >
+                        {coverUploading ? '⏳ Nahrávání...' : '📁 Nahrát z PC'}
+                      </button>
+                      <p className="text-xs text-gray-500 flex-1">nebo přetáhni obrázek sem</p>
+                    </div>
+                  </div>
+                </div>
+                {formData.coverImage?.trim() && (
+                  <div className="mt-2">
+                    <img
+                      src={formData.coverImage}
+                      alt={formData.coverAlt || 'Náhled obrázku'}
+                      className="max-w-full h-auto rounded border border-gray-200 aspect-video object-cover"
+                      style={{ maxHeight: '200px' }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="coverAlt" className="block text-sm font-medium text-gray-700 mb-2">
+                  Popisek obrázku (alt text)
+                </label>
+                <input
+                  id="coverAlt"
+                  type="text"
+                  value={formData.coverAlt}
+                  onChange={(e) => setFormData({ ...formData, coverAlt: e.target.value })}
+                  className="input-field"
+                  placeholder="Např. Knedlíky"
                 />
               </div>
 

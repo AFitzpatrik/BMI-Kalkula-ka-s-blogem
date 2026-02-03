@@ -10,6 +10,8 @@ export interface BlogPost {
   createdAt: string
   updatedAt: string
   slug: string
+  coverImage?: string
+  coverAlt?: string
 }
 
 const postsDirectory = path.join(process.cwd(), 'posts')
@@ -96,6 +98,8 @@ function buildPostFromFile(filePath: string): BlogPost | null {
       slug,
       createdAt,
       updatedAt,
+      coverImage: data.coverImage || data.cover_image || undefined,
+      coverAlt: data.coverAlt || data.cover_alt || undefined,
     }
   } catch (error) {
     console.error('Error parsing markdown file:', filePath, error)
@@ -167,17 +171,18 @@ export async function createPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'upda
 
     ensureDirectoryExists()
     const filePath = getMarkdownFilePath(newPost.slug)
-    const fileContent = stringifyFrontmatter(
-      {
-        id: newPost.id,
-        title: newPost.title,
-        excerpt: newPost.excerpt,
-        author: newPost.author,
-        createdAt: newPost.createdAt,
-        updatedAt: newPost.updatedAt,
-      },
-      newPost.content
-    )
+    const frontmatterData: Record<string, string> = {
+      id: newPost.id,
+      title: newPost.title,
+      excerpt: newPost.excerpt,
+      author: newPost.author,
+      createdAt: newPost.createdAt,
+      updatedAt: newPost.updatedAt,
+    }
+    if (newPost.coverImage) frontmatterData.coverImage = newPost.coverImage
+    if (newPost.coverAlt) frontmatterData.coverAlt = newPost.coverAlt
+
+    const fileContent = stringifyFrontmatter(frontmatterData, newPost.content)
     fs.writeFileSync(filePath, fileContent, 'utf-8')
     console.log('✅ Post created in FS (markdown):', newPost.id, newPost.title)
     
@@ -203,17 +208,18 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
 
     ensureDirectoryExists()
     const filePath = getMarkdownFilePath(updatedPost.slug)
-    const fileContent = stringifyFrontmatter(
-      {
-        id: updatedPost.id,
-        title: updatedPost.title,
-        excerpt: updatedPost.excerpt,
-        author: updatedPost.author,
-        createdAt: updatedPost.createdAt,
-        updatedAt: updatedPost.updatedAt,
-      },
-      updatedPost.content
-    )
+    const frontmatterData: Record<string, string> = {
+      id: updatedPost.id,
+      title: updatedPost.title,
+      excerpt: updatedPost.excerpt,
+      author: updatedPost.author,
+      createdAt: updatedPost.createdAt,
+      updatedAt: updatedPost.updatedAt,
+    }
+    if (updatedPost.coverImage) frontmatterData.coverImage = updatedPost.coverImage
+    if (updatedPost.coverAlt) frontmatterData.coverAlt = updatedPost.coverAlt
+
+    const fileContent = stringifyFrontmatter(frontmatterData, updatedPost.content)
     fs.writeFileSync(filePath, fileContent, 'utf-8')
     console.log('✅ Post updated in FS (markdown):', id)
     

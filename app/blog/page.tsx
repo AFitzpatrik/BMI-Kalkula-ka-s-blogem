@@ -1,5 +1,6 @@
 import { getAllPosts } from '@/lib/posts'
 import Link from 'next/link'
+import Image from 'next/image'
 import { format } from 'date-fns'
 import { cs } from 'date-fns/locale/cs'
 import AdBanner from '@/components/AdBanner'
@@ -49,27 +50,49 @@ export default async function BlogPage() {
           <div className="space-y-6">
             {posts.map((post) => (
               <article key={post.id} className="card hover:shadow-xl transition-shadow">
-                <Link href={`/blog/${post.slug}`}>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-3 hover:text-primary-600 transition-colors">
-                    {post.title}
-                  </h2>
-                </Link>
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {post.excerpt}
-                </p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <div className="flex items-center space-x-4">
-                    <span>Autor: {post.author}</span>
-                    <span>
-                      {format(new Date(post.createdAt), 'd. MMMM yyyy', { locale: cs })}
-                    </span>
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="md:w-56 lg:w-64 flex-shrink-0">
+                    <Link href={`/blog/${post.slug}`} aria-label={`Otevřít článek ${post.title}`}>
+                      {post.coverImage ? (
+                        <Image
+                          src={post.coverImage}
+                          alt={post.coverAlt || post.title}
+                          width={420}
+                          height={280}
+                          className="w-full aspect-video object-cover rounded-lg"
+                          sizes="(max-width: 768px) 100vw, 260px"
+                        />
+                      ) : (
+                        <div className="w-full aspect-video rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
+                          Bez obrázku
+                        </div>
+                      )}
+                    </Link>
                   </div>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="text-primary-600 hover:text-primary-700 font-semibold"
-                  >
-                    Číst více →
-                  </Link>
+
+                  <div className="flex-1">
+                    <Link href={`/blog/${post.slug}`}>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2 hover:text-primary-600 transition-colors">
+                        {post.title}
+                      </h2>
+                    </Link>
+                    <div className="text-sm text-gray-500 mb-3 flex flex-wrap items-center gap-2">
+                      <span>{post.author}</span>
+                      <span>•</span>
+                      <time dateTime={post.createdAt}>
+                        {format(new Date(post.createdAt), 'd. MMMM yyyy', { locale: cs })}
+                      </time>
+                    </div>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="text-primary-600 hover:text-primary-700 font-semibold"
+                    >
+                      Číst více →
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}

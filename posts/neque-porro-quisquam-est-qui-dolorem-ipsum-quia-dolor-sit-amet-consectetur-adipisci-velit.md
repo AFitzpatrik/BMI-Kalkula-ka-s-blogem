@@ -3,6 +3,8 @@ id: "1770028487293"
 title: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.."
 excerpt: "Phasellus pharetra vel libero at finibus. Proin commodo maximus euismod. Donec nec felis vel mauris efficitur mollis condimentum ut nunc."
 author: "Patrik Franců"
+coverImage: "/uploads/1770028503238-486649767_1587531971908049_808839273414155210_n-removebg-preview.png"
+coverAlt: "Knedlíky"
 createdAt: "2026-02-02T10:34:47.293Z"
 updatedAt: "2026-02-02T10:35:05.251Z"
 ---

@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, content, excerpt, author } = body
+    const { title, content, excerpt, author, coverImage, coverAlt } = body
 
     if (!title || !content || !excerpt || !author) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const post = await createPost({ title, content, excerpt, author })
+    const post = await createPost({ title, content, excerpt, author, coverImage, coverAlt })
     return NextResponse.json(post, { status: 201 })
   } catch (error) {
     console.error('POST error:', error)
